@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Exhibition & Conference Calendar</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 28px;
+    }
+
+    .header h1 {
+      margin: 0 0 10px;
+      font-size: 32px;
+    }
+
+    .header p {
+      margin: 0;
+      color: #666;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 21px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d7dce1;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #3d6fc4;
+    }
+
+    .button-area {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary-button {
+      background: #1f4f93;
+      color: #fff;
+    }
+
+    .secondary-button {
+      background: #e9edf2;
+      color: #333;
+    }
+
+    .delete-button {
+      background: #fbe8e8;
+      color: #b42318;
+      padding: 7px 11px;
+    }
+
+    .filter-area {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .filter-area input,
+    .filter-area select {
+      max-width: 260px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1000px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 13px 12px;
+      border-bottom: 1px solid #e7e9ec;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f8f9fb;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    td a {
+      color: #1f4f93;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-review {
+      background: #fff4d6;
+      color: #8a5a00;
+    }
+
+    .status-planned {
+      background: #e5f0ff;
+      color: #1d4f91;
+    }
+
+    .status-completed {
+      background: #e5f7ec;
+      color: #176b3a;
+    }
+
+    .status-hold {
+      background: #f0f1f3;
+      color: #555;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: #888;
+      padding: 36px 0;
+    }
+
+    @media (max-width: 900px) {
+      .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 24px 12px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full {
+        grid-column: auto;
+      }
+
+      .header h1 {
+        font-size: 25px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <header class="header">
+      <h1>Exhibition & Conference Calendar</h1>
+      <p>멕아이씨에스 국내외 전시회 및 학회 일정 관리</p>
+    </header>
+
+    <section class="card">
+      <h2>행사 등록</h2>
+
+      <form id="eventForm">
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="eventName">행사명</label>
+            <input
+              id="eventName"
+              type="text"
+              placeholder="예: ERS Congress 2026"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="eventType">구분</label>
+            <select id="eventType" required>
+              <option value="">선택</option>
+              <option value="전시회">전시회</option>
+              <option value="학회">학회</option>
+              <option value="세미나">세미나</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="country">국가</label>
+            <input
+              id="country"
+              type="text"
+              placeholder="예: Netherlands"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="city">도시</label>
+            <input
+              id="city"
+              type="text"
+              placeholder="예: Amsterdam"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="startDate">시작일</label>
+            <input id="startDate" type="date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">종료일</label>
+            <input id="endDate" type="date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="deadline">신청 마감일</label>
+            <input id="deadline" type="date" />
+          </div>
+
+          <div class="form-group">
+            <label for="status">진행 상태</label>
+            <select id="status" required>
+              <option value="검토 중">검토 중</option>
+              <option value="참가 예정">참가 예정</option>
+              <option value="신청 완료">신청 완료</option>
+              <option value="참가 완료">참가 완료</option>
+              <option value="참가 보류">참가 보류</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="manager">담당자</label>
+            <input
+              id="manager"
+              type="text"
+              placeholder="예: 장현호"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="cost">예상 비용</label>
+            <input
+              id="cost"
+              type="text"
+              placeholder="예: 10,000,000원"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="website">공식 홈페이지</label>
+            <input
+              id="website"
+              type="url"
+              placeholder="https://"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="participation">참가 여부</label>
+            <select id="participation">
+              <option value="미정">미정</option>
+              <option value="참가">참가</option>
+              <option value="불참">불참</option>
+            </select>
+          </div>
+
+          <div class="form-group full">
+            <label for="memo">메모</label>
+            <textarea
+              id="memo"
+              placeholder="부스 정보, 지원사업, 준비사항 등을 입력하세요."
+            ></textarea>
+          </div>
+
+        </div>
+
+        <div class="button-area">
+          <button
+            type="reset"
+            class="secondary-button"
+          >
+            초기화
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+          >
+            일정 저장
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>행사 목록</h2>
+
+      <div class="filter-area">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="행사명, 국가, 도시 검색"
+        />
+
+        <select id="statusFilter">
+          <option value="">전체 상태</option>
+          <option value="검토 중">검토 중</option>
+          <option value="참가 예정">참가 예정</option>
+          <option value="신청 완료">신청 완료</option>
+          <option value="참가 완료">참가 완료</option>
+          <option value="참가 보류">참가 보류</option>
+        </select>
+
+        <select id="typeFilter">
+          <option value="">전체 구분</option>
+          <option value="전시회">전시회</option>
+          <option value="학회">학회</option>
+          <option value="세미나">세미나</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>행사명</th>
+              <th>구분</th>
+              <th>국가·도시</th>
+              <th>행사 기간</th>
+              <th>신청 마감</th>
+              <th>참가 여부</th>
+              <th>진행 상태</th>
+              <th>담당자</th>
+              <th>홈페이지</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+
+          <tbody id="eventTableBody"></tbody>
+        </table>
+
+        <div
+          id="emptyMessage"
+          class="empty-message"
+        >
+          등록된 일정이 없습니다.
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    const form = document.getElementById("eventForm");
+    const eventTableBody = document.getElementById("eventTableBody");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+    const typeFilter = document.getElementById("typeFilter");
+
+    let events = JSON.parse(localStorage.getItem("mekicsEvents")) || [];
+
+    function saveEvents() {
+      localStorage.setItem("mekicsEvents", JSON.stringify(events));
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return "-";
+
+      const date = new Date(dateString);
+
+      return date.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      });
+    }
+
+    function getStatusClass(status) {
+      if (status === "검토 중") return "status-review";
+
+      if (
+        status === "참가 예정" ||
+        status === "신청 완료"
+      ) {
+        return "status-planned";
+      }
+
+      if (status === "참가 완료") {
+        return "status-completed";
+      }
+
+      return "status-hold";
+    }
+
+    function renderEvents() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const selectedStatus = statusFilter.value;
+      const selectedType = typeFilter.value;
+
+      const filteredEvents = events.filter((event) => {
+        const searchableText = [
+          event.name,
+          event.country,
+          event.city,
+          event.manager
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        const matchesKeyword = searchableText.includes(keyword);
+        const matchesStatus =
+          !selectedStatus || event.status === selectedStatus;
+        const matchesType =
+          !selectedType || event.type === selectedType;
+
+        return matchesKeyword && matchesStatus && matchesType;
+      });
+
+      eventTableBody.innerHTML = "";
+
+      if (filteredEvents.length === 0) {
+        emptyMessage.style.display = "block";
+        return;
+      }
+
+      emptyMessage.style.display = "none";
+
+      filteredEvents
+        .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+        .forEach((event) => {
+          const row = document.createElement("tr");
+
+          const websiteLink = event.website
+            ? `<a href="${event.website}" target="_blank">바로가기</a>`
+            : "-";
+
+          row.innerHTML = `
+            <td>
+              <strong>${event.name}</strong>
+              ${
+                event.memo
+                  ? `<div style="margin-top:6px;color:#777;font-size:12px;">
+                      ${event.memo}
+                    </div>`
+                  : ""
+              }
+            </td>
+
+            <td>${event.type}</td>
+
+            <td>
+              ${event.country || "-"}
+              ${event.city ? ` · ${event.city}` : ""}
+            </td>
+
+            <td>
+              ${formatDate(event.startDate)}
+              <br />
+              ~ ${formatDate(event.endDate)}
+            </td>
+
+            <td>${formatDate(event.deadline)}</td>
+
+            <td>${event.participation}</td>
+
+            <td>
+              <span class="status ${getStatusClass(event.status)}">
+                ${event.status}
+              </span>
+            </td>
+
+            <td>${event.manager || "-"}</td>
+
+            <td>${websiteLink}</td>
+
+            <td>
+              <button
+                class="delete-button"
+                onclick="deleteEvent('${event.id}')"
+              >
+                삭제
+              </button>
+            </td>
+          `;
+
+          eventTableBody.appendChild(row);
+        });
+    }
+
+    function deleteEvent(id) {
+      const confirmed = confirm("이 일정을 삭제할까요?");
+
+      if (!confirmed) return;
+
+      events = events.filter((event) => event.id !== id);
+
+      saveEvents();
+      renderEvents();
+    }
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+
+      if (endDate < startDate) {
+        alert("종료일은 시작일보다 빠를 수 없습니다.");
+        return;
+      }
+
+      const newEvent = {
+        id: Date.now().toString(),
+        name: document.getElementById("eventName").value.trim(),
+        type: document.getElementById("eventType").value,
+        country: document.getElementById("country").value.trim(),
+        city: document.getElementById("city").value.trim(),
+        startDate,
+        endDate,
+        deadline: document.getElementById("deadline").value,
+        status: document.getElementById("status").value,
+        manager: document.getElementById("manager").value.trim(),
+        cost: document.getElementById("cost").value.trim(),
+        website: document.getElementById("website").value.trim(),
+        participation: document.getElementById("participation").value,
+        memo: document.getElementById("memo").value.trim()
+      };
+
+      events.push(newEvent);
+
+      saveEvents();
+      renderEvents();
+
+      form.reset();
+
+      alert("일정이 저장되었습니다.");
+    });
+
+    searchInput.addEventListener("input", renderEvents);
+    statusFilter.addEventListener("change", renderEvents);
+    typeFilter.addEventListener("change", renderEvents);
+
+    renderEvents();
+  </script>
+</body>
+</html>
