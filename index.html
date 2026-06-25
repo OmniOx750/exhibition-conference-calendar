@@ -3,73 +3,271 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Exhibition & Conference Calendar</title>
-
   <style>
+    :root {
+      --primary: #1667d9;
+      --primary-dark: #0f4fae;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #6f7b91;
+      --line: #dfe5ef;
+      --danger: #d64545;
+      --success: #16865c;
+      --warning: #c27a00;
+      --shadow: 0 12px 30px rgba(24, 44, 82, 0.08);
+    }
+
     * {
       box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      padding: 40px 20px;
-      font-family: Arial, "Noto Sans KR", sans-serif;
-      background: #f4f6f8;
-      color: #222;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Pretendard, "Noto Sans KR", Arial, sans-serif;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
     }
 
     .container {
-      max-width: 1200px;
+      width: min(1440px, calc(100% - 32px));
       margin: 0 auto;
+      padding: 32px 0 64px;
     }
 
-    .header {
-      margin-bottom: 28px;
-    }
-
-    .header h1 {
-      margin: 0 0 10px;
-      font-size: 32px;
-    }
-
-    .header p {
-      margin: 0;
-      color: #666;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 24px;
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
       margin-bottom: 24px;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
     }
 
-    .card h2 {
-      margin-top: 0;
-      margin-bottom: 20px;
-      font-size: 21px;
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.1;
     }
 
-    .form-grid {
+    .hero p {
+      margin: 10px 0 0;
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .panel {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 14px;
+      margin-bottom: 20px;
     }
 
-    .form-group {
+    .stat-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+
+    .stat-card span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 24px;
+    }
+
+    .year-comparison {
+      margin-bottom: 20px;
+    }
+
+    .comparison-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .comparison-head h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .comparison-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .comparison-summary {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .year-chart {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      align-items: end;
+      min-height: 250px;
+    }
+
+    .year-bar-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 230px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fafbfd;
+    }
+
+    .year-bar-value {
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      text-align: center;
+      word-break: keep-all;
+    }
+
+    .year-bar-track {
+      display: flex;
+      align-items: flex-end;
+      height: 145px;
+      padding: 0 18px;
+      border-radius: 12px;
+      background:
+        repeating-linear-gradient(
+          to top,
+          #f0f3f8 0,
+          #f0f3f8 1px,
+          transparent 1px,
+          transparent 36px
+        );
+    }
+
+    .year-bar {
+      width: 100%;
+      min-height: 4px;
+      border-radius: 10px 10px 3px 3px;
+      background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+      transition: height 0.3s ease;
+    }
+
+    .year-bar-label {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .year-bar-label strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .year-bar-label span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .comparison-table-wrap {
+      margin-top: 18px;
+      overflow-x: auto;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      text-align: left;
+    }
+
+    .comparison-table th {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(340px, 0.8fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) repeat(4, minmax(120px, 0.32fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .field {
       display: flex;
       flex-direction: column;
       gap: 7px;
     }
 
-    .form-group.full {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      font-size: 14px;
+    .field label {
+      color: #39435a;
+      font-size: 13px;
       font-weight: 700;
     }
 
@@ -77,189 +275,427 @@
     select,
     textarea {
       width: 100%;
-      padding: 11px 12px;
-      border: 1px solid #d7dce1;
-      border-radius: 8px;
-      font-size: 14px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
       background: #fff;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input,
+    select {
+      height: 44px;
+      padding: 0 12px;
     }
 
     textarea {
-      min-height: 90px;
+      min-height: 100px;
+      padding: 12px;
       resize: vertical;
     }
 
     input:focus,
     select:focus,
     textarea:focus {
-      outline: none;
-      border-color: #3d6fc4;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(22, 103, 217, 0.12);
     }
 
-    .button-area {
+    .event-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .event-card {
+      position: relative;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .event-card:hover {
+      transform: translateY(-2px);
+      border-color: #bfcbe0;
+      box-shadow: 0 10px 25px rgba(24, 44, 82, 0.08);
+    }
+
+    .event-card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .event-card h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .event-meta {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .meta-item {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #f7f9fc;
+    }
+
+    .meta-item span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .meta-item strong {
+      font-size: 13px;
+      word-break: break-word;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #eef4fd;
+      color: var(--primary-dark);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.success {
+      background: #e8f7f0;
+      color: var(--success);
+    }
+
+    .badge.warning {
+      background: #fff4dc;
+      color: var(--warning);
+    }
+
+    .badge.gray {
+      background: #eef0f4;
+      color: #687085;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      min-height: 42px;
+      padding: 0 15px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn.secondary {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+    }
+
+    .btn.secondary:hover {
+      background: #f5f7fb;
+    }
+
+    .btn.danger {
+      background: #fff0f0;
+      color: var(--danger);
+    }
+
+    .btn.small {
+      min-height: 34px;
+      padding: 0 11px;
+      font-size: 12px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
       margin-top: 18px;
+    }
+
+    .form-actions .btn {
+      flex: 1;
+    }
+
+    .empty {
+      padding: 50px 20px;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(11, 20, 37, 0.5);
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      position: relative;
+      width: min(760px, 100%);
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 30px;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 50%;
+      background: #f2f4f8;
+      font-size: 24px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .detail-item {
+      padding: 14px;
+      border-radius: 12px;
+      background: #f7f9fc;
+    }
+
+    .detail-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .detail-item span {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .detail-item strong,
+    .detail-item a {
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .detail-item a {
+      color: var(--primary);
+    }
+
+    .modal-actions {
       display: flex;
       justify-content: flex-end;
       gap: 10px;
+      margin-top: 20px;
     }
 
-    button {
-      border: 0;
-      border-radius: 8px;
-      padding: 11px 18px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
+    .notice {
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #eef5ff;
+      color: #315b97;
+      font-size: 13px;
+      line-height: 1.5;
     }
 
-    .primary-button {
-      background: #1f4f93;
-      color: #fff;
-    }
-
-    .secondary-button {
-      background: #e9edf2;
-      color: #333;
-    }
-
-    .delete-button {
-      background: #fbe8e8;
-      color: #b42318;
-      padding: 7px 11px;
-    }
-
-    .filter-area {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
-    }
-
-    .filter-area input,
-    .filter-area select {
-      max-width: 260px;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      min-width: 1000px;
-      border-collapse: collapse;
-    }
-
-    th,
-    td {
-      padding: 13px 12px;
-      border-bottom: 1px solid #e7e9ec;
-      text-align: left;
-      font-size: 14px;
-      vertical-align: middle;
-    }
-
-    th {
-      background: #f8f9fb;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    td a {
-      color: #1f4f93;
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    .status {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .status-review {
-      background: #fff4d6;
-      color: #8a5a00;
-    }
-
-    .status-planned {
-      background: #e5f0ff;
-      color: #1d4f91;
-    }
-
-    .status-completed {
-      background: #e5f7ec;
-      color: #176b3a;
-    }
-
-    .status-hold {
-      background: #f0f1f3;
-      color: #555;
-    }
-
-    .empty-message {
-      text-align: center;
-      color: #888;
-      padding: 36px 0;
-    }
-
-    @media (max-width: 900px) {
-      .form-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 24px 12px;
-      }
-
-      .form-grid {
+    @media (max-width: 1100px) {
+      .layout {
         grid-template-columns: 1fr;
       }
 
-      .form-group.full {
+      .toolbar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .event-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .container {
+        width: min(100% - 20px, 1440px);
+        padding-top: 20px;
+      }
+
+      .hero,
+      .comparison-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .comparison-summary {
+        text-align: left;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .toolbar,
+      .form-grid,
+      .event-meta,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .field.full,
+      .detail-item.full {
         grid-column: auto;
       }
 
-      .header h1 {
-        font-size: 25px;
+      .event-card-top {
+        flex-direction: column;
+      }
+
+      .card-actions {
+        width: 100%;
+      }
+
+      .card-actions .btn {
+        flex: 1;
+      }
+
+      .modal {
+        padding: 12px;
+      }
+
+      .modal-content {
+        padding: 24px 18px;
       }
     }
   </style>
 </head>
-
 <body>
-  <div class="container">
+  <main class="container">
+    <header class="hero">
+      <div>
+        <h1>Exhibition & Conference Calendar</h1>
+        <p>국내외 전시회·학회 일정, 비용, 신청 마감일과 진행 상태를 한눈에 관리합니다.</p>
+      </div>
 
-    <header class="header">
-      <h1>Exhibition & Conference Calendar</h1>
-      <p>멕아이씨에스 국내외 전시회 및 학회 일정 관리</p>
+      <div class="hero-actions">
+        <button class="btn secondary" type="button" onclick="downloadCSV()">CSV 다운로드</button>
+        <button class="btn secondary" type="button" onclick="document.getElementById('importFile').click()">데이터 불러오기</button>
+        <button class="btn secondary" type="button" onclick="exportBackup()">백업 저장</button>
+        <input id="importFile" type="file" accept=".json" hidden />
+      </div>
     </header>
 
-    <section class="card">
-      <h2>행사 등록</h2>
+    <section class="stats">
+      <div class="stat-card">
+        <span>전체 행사</span>
+        <strong id="totalCount">0</strong>
+      </div>
+      <div class="stat-card">
+        <span>참가 예정</span>
+        <strong id="plannedCount">0</strong>
+      </div>
+      <div class="stat-card">
+        <span>신청 마감 임박</span>
+        <strong id="deadlineCount">0</strong>
+      </div>
+      <div class="stat-card">
+        <span>총 예상 비용</span>
+        <strong id="totalCost">0원</strong>
+      </div>
+    </section>
 
-      <form id="eventForm">
-        <div class="form-grid">
+    <section class="panel year-comparison">
+      <div class="comparison-head">
+        <div>
+          <h2>연도별 예상비용 비교</h2>
+          <p>행사 시작일을 기준으로 연도별 행사 수와 예상비용을 비교합니다.</p>
+        </div>
+        <div id="comparisonSummary" class="comparison-summary"></div>
+      </div>
 
-          <div class="form-group">
-            <label for="eventName">행사명</label>
-            <input
-              id="eventName"
-              type="text"
-              placeholder="예: ERS Congress 2026"
-              required
-            />
+      <div id="yearChart" class="year-chart"></div>
+      <div id="comparisonTableWrap" class="comparison-table-wrap"></div>
+    </section>
+
+    <section class="layout">
+      <div class="panel">
+        <div class="section-head">
+          <h2>행사 목록</h2>
+          <span id="resultCount">0건</span>
+        </div>
+
+        <div class="toolbar">
+          <div class="field">
+            <label for="searchInput">검색</label>
+            <input id="searchInput" type="search" placeholder="행사명, 국가, 도시, 담당자 검색" />
           </div>
 
-          <div class="form-group">
-            <label for="eventType">구분</label>
-            <select id="eventType" required>
-              <option value="">선택</option>
+          <div class="field">
+            <label for="yearFilter">연도</label>
+            <select id="yearFilter">
+              <option value="">전체 연도</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="typeFilter">구분</label>
+            <select id="typeFilter">
+              <option value="">전체</option>
               <option value="전시회">전시회</option>
               <option value="학회">학회</option>
               <option value="세미나">세미나</option>
@@ -267,363 +703,762 @@
             </select>
           </div>
 
-          <div class="form-group">
-            <label for="country">국가</label>
-            <input
-              id="country"
-              type="text"
-              placeholder="예: Netherlands"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="city">도시</label>
-            <input
-              id="city"
-              type="text"
-              placeholder="예: Amsterdam"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="startDate">시작일</label>
-            <input id="startDate" type="date" required />
-          </div>
-
-          <div class="form-group">
-            <label for="endDate">종료일</label>
-            <input id="endDate" type="date" required />
-          </div>
-
-          <div class="form-group">
-            <label for="deadline">신청 마감일</label>
-            <input id="deadline" type="date" />
-          </div>
-
-          <div class="form-group">
-            <label for="status">진행 상태</label>
-            <select id="status" required>
+          <div class="field">
+            <label for="participationFilter">참가 여부</label>
+            <select id="participationFilter">
+              <option value="">전체</option>
               <option value="검토 중">검토 중</option>
               <option value="참가 예정">참가 예정</option>
-              <option value="신청 완료">신청 완료</option>
-              <option value="참가 완료">참가 완료</option>
-              <option value="참가 보류">참가 보류</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="manager">담당자</label>
-            <input
-              id="manager"
-              type="text"
-              placeholder="예: 장현호"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="cost">예상 비용</label>
-            <input
-              id="cost"
-              type="text"
-              placeholder="예: 10,000,000원"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="website">공식 홈페이지</label>
-            <input
-              id="website"
-              type="url"
-              placeholder="https://"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="participation">참가 여부</label>
-            <select id="participation">
-              <option value="미정">미정</option>
-              <option value="참가">참가</option>
+              <option value="참가 확정">참가 확정</option>
               <option value="불참">불참</option>
             </select>
           </div>
 
-          <div class="form-group full">
-            <label for="memo">메모</label>
-            <textarea
-              id="memo"
-              placeholder="부스 정보, 지원사업, 준비사항 등을 입력하세요."
-            ></textarea>
+          <div class="field">
+            <label for="sortFilter">정렬</label>
+            <select id="sortFilter">
+              <option value="startAsc">시작일 빠른 순</option>
+              <option value="startDesc">시작일 늦은 순</option>
+              <option value="deadlineAsc">마감일 빠른 순</option>
+              <option value="costDesc">비용 높은 순</option>
+              <option value="nameAsc">행사명 순</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="eventList" class="event-list"></div>
+      </div>
+
+      <aside class="panel">
+        <div class="section-head">
+          <h2 id="formTitle">일정 등록</h2>
+        </div>
+
+        <div class="notice">
+          등록한 데이터는 현재 브라우저의 localStorage에 저장됩니다. 브라우저 데이터 삭제에 대비해 백업 저장을 권장합니다.
+        </div>
+
+        <form id="eventForm">
+          <div class="form-grid">
+            <div class="field full">
+              <label for="eventName">행사명 *</label>
+              <input id="eventName" required />
+            </div>
+
+            <div class="field">
+              <label for="eventType">구분 *</label>
+              <select id="eventType" required>
+                <option value="">선택</option>
+                <option value="전시회">전시회</option>
+                <option value="학회">학회</option>
+                <option value="세미나">세미나</option>
+                <option value="기타">기타</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="participation">참가 여부</label>
+              <select id="participation">
+                <option value="검토 중">검토 중</option>
+                <option value="참가 예정">참가 예정</option>
+                <option value="참가 확정">참가 확정</option>
+                <option value="불참">불참</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="country">국가</label>
+              <input id="country" />
+            </div>
+
+            <div class="field">
+              <label for="city">도시</label>
+              <input id="city" />
+            </div>
+
+            <div class="field">
+              <label for="startDate">시작일 *</label>
+              <input id="startDate" type="date" required />
+            </div>
+
+            <div class="field">
+              <label for="endDate">종료일 *</label>
+              <input id="endDate" type="date" required />
+            </div>
+
+            <div class="field">
+              <label for="deadline">신청 마감일</label>
+              <input id="deadline" type="date" />
+            </div>
+
+            <div class="field">
+              <label for="status">진행 상태</label>
+              <select id="status">
+                <option value="정보 수집">정보 수집</option>
+                <option value="검토 중">검토 중</option>
+                <option value="신청 준비">신청 준비</option>
+                <option value="신청 완료">신청 완료</option>
+                <option value="준비 중">준비 중</option>
+                <option value="종료">종료</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="manager">담당자</label>
+              <input id="manager" />
+            </div>
+
+            <div class="field">
+              <label for="cost">예상 비용</label>
+              <input id="cost" inputmode="numeric" placeholder="예: 12000000" />
+            </div>
+
+            <div class="field full">
+              <label for="website">공식 홈페이지</label>
+              <input id="website" type="url" placeholder="https://..." />
+            </div>
+
+            <div class="field full">
+              <label for="memo">메모</label>
+              <textarea id="memo" placeholder="부스 비용, 신청 조건, 확인 사항 등을 입력하세요."></textarea>
+            </div>
           </div>
 
-        </div>
-
-        <div class="button-area">
-          <button
-            type="reset"
-            class="secondary-button"
-          >
-            초기화
-          </button>
-
-          <button
-            type="submit"
-            class="primary-button"
-          >
-            일정 저장
-          </button>
-        </div>
-      </form>
+          <div class="form-actions">
+            <button id="submitButton" class="btn" type="submit">일정 등록</button>
+            <button id="cancelEditButton" class="btn secondary" type="button" hidden>수정 취소</button>
+          </div>
+        </form>
+      </aside>
     </section>
+  </main>
 
-    <section class="card">
-      <h2>행사 목록</h2>
-
-      <div class="filter-area">
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="행사명, 국가, 도시 검색"
-        />
-
-        <select id="statusFilter">
-          <option value="">전체 상태</option>
-          <option value="검토 중">검토 중</option>
-          <option value="참가 예정">참가 예정</option>
-          <option value="신청 완료">신청 완료</option>
-          <option value="참가 완료">참가 완료</option>
-          <option value="참가 보류">참가 보류</option>
-        </select>
-
-        <select id="typeFilter">
-          <option value="">전체 구분</option>
-          <option value="전시회">전시회</option>
-          <option value="학회">학회</option>
-          <option value="세미나">세미나</option>
-          <option value="기타">기타</option>
-        </select>
+  <div id="detailModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <div class="modal-content">
+      <button class="modal-close" type="button" onclick="closeDetail()" aria-label="닫기">×</button>
+      <h2 id="detailTitle"></h2>
+      <div id="detailBody"></div>
+      <div class="modal-actions">
+        <button class="btn secondary" type="button" onclick="closeDetail()">닫기</button>
+        <button class="btn" type="button" onclick="editSelectedEvent()">수정</button>
       </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>행사명</th>
-              <th>구분</th>
-              <th>국가·도시</th>
-              <th>행사 기간</th>
-              <th>신청 마감</th>
-              <th>참가 여부</th>
-              <th>진행 상태</th>
-              <th>담당자</th>
-              <th>홈페이지</th>
-              <th>관리</th>
-            </tr>
-          </thead>
-
-          <tbody id="eventTableBody"></tbody>
-        </table>
-
-        <div
-          id="emptyMessage"
-          class="empty-message"
-        >
-          등록된 일정이 없습니다.
-        </div>
-      </div>
-    </section>
-
+    </div>
   </div>
 
   <script>
-    const form = document.getElementById("eventForm");
-    const eventTableBody = document.getElementById("eventTableBody");
-    const emptyMessage = document.getElementById("emptyMessage");
-    const searchInput = document.getElementById("searchInput");
-    const statusFilter = document.getElementById("statusFilter");
-    const typeFilter = document.getElementById("typeFilter");
+    const STORAGE_KEY = 'mekicsExhibitionConferenceEvents';
+    let events = loadEvents();
+    let editingEventId = null;
+    let selectedEventId = null;
 
-    let events = JSON.parse(localStorage.getItem("mekicsEvents")) || [];
+    const eventForm = document.getElementById('eventForm');
+    const eventList = document.getElementById('eventList');
+    const detailModal = document.getElementById('detailModal');
+    const importFile = document.getElementById('importFile');
+
+    function loadEvents() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (Array.isArray(saved)) return saved;
+
+        const oldKeys = ['mekicsEvents', 'events', 'conferenceEvents'];
+        for (const key of oldKeys) {
+          const oldData = JSON.parse(localStorage.getItem(key));
+          if (Array.isArray(oldData) && oldData.length) {
+            const normalized = oldData.map(normalizeEvent);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+            return normalized;
+          }
+        }
+      } catch (error) {
+        console.error('저장 데이터를 불러오지 못했습니다.', error);
+      }
+
+      return [];
+    }
+
+    function normalizeEvent(item) {
+      return {
+        id: item.id || createId(),
+        name: item.name || item.title || item.eventName || '',
+        type: item.type || item.eventType || '기타',
+        country: item.country || '',
+        city: item.city || '',
+        startDate: item.startDate || item.start || '',
+        endDate: item.endDate || item.end || '',
+        deadline: item.deadline || item.applicationDeadline || '',
+        participation: item.participation || item.attendance || '검토 중',
+        status: item.status || '정보 수집',
+        manager: item.manager || item.owner || '',
+        cost: parseCost(item.cost ?? item.estimatedCost ?? item.budget ?? 0),
+        website: item.website || item.url || '',
+        memo: item.memo || item.notes || '',
+        createdAt: item.createdAt || new Date().toISOString(),
+        updatedAt: item.updatedAt || ''
+      };
+    }
+
+    function createId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
 
     function saveEvents() {
-      localStorage.setItem("mekicsEvents", JSON.stringify(events));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
     }
 
-    function formatDate(dateString) {
-      if (!dateString) return "-";
+    function parseCost(value) {
+      const number = Number(String(value ?? '').replace(/[^0-9.-]/g, ''));
+      return Number.isFinite(number) && number > 0 ? Math.round(number) : 0;
+    }
 
-      const date = new Date(dateString);
+    function formatCost(value) {
+      const number = parseCost(value);
+      return number ? `${number.toLocaleString('ko-KR')}원` : '미정';
+    }
 
-      return date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
+    function formatDate(value) {
+      if (!value) return '-';
+      const [year, month, day] = value.split('-');
+      return `${year}.${month}.${day}`;
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function safeURL(value) {
+      try {
+        const url = new URL(value);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+      } catch {
+        return '';
+      }
+    }
+
+    function getFilteredEvents() {
+      const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+      const year = document.getElementById('yearFilter').value;
+      const type = document.getElementById('typeFilter').value;
+      const participation = document.getElementById('participationFilter').value;
+      const sort = document.getElementById('sortFilter').value;
+
+      const filtered = events.filter(event => {
+        const haystack = [
+          event.name,
+          event.type,
+          event.country,
+          event.city,
+          event.manager,
+          event.status,
+          event.memo
+        ].join(' ').toLowerCase();
+
+        const eventYear = event.startDate ? event.startDate.slice(0, 4) : '';
+
+        return (!keyword || haystack.includes(keyword))
+          && (!year || eventYear === year)
+          && (!type || event.type === type)
+          && (!participation || event.participation === participation);
       });
+
+      filtered.sort((a, b) => {
+        if (sort === 'startDesc') return (b.startDate || '').localeCompare(a.startDate || '');
+        if (sort === 'deadlineAsc') return (a.deadline || '9999-12-31').localeCompare(b.deadline || '9999-12-31');
+        if (sort === 'costDesc') return parseCost(b.cost) - parseCost(a.cost);
+        if (sort === 'nameAsc') return (a.name || '').localeCompare(b.name || '', 'ko');
+        return (a.startDate || '9999-12-31').localeCompare(b.startDate || '9999-12-31');
+      });
+
+      return filtered;
     }
 
-    function getStatusClass(status) {
-      if (status === "검토 중") return "status-review";
+    function getManagedYears() {
+      const eventYears = events
+        .map(event => Number((event.startDate || '').slice(0, 4)))
+        .filter(year => Number.isInteger(year) && year >= 2026);
 
-      if (
-        status === "참가 예정" ||
-        status === "신청 완료"
-      ) {
-        return "status-planned";
+      const currentYear = new Date().getFullYear();
+      const maxYear = Math.max(2026, currentYear, ...eventYears);
+      return Array.from({ length: maxYear - 2026 + 1 }, (_, index) => 2026 + index);
+    }
+
+    function populateYearFilter() {
+      const select = document.getElementById('yearFilter');
+      const selected = select.value;
+      const years = getManagedYears();
+
+      select.innerHTML = [
+        '<option value="">전체 연도</option>',
+        ...years.map(year => `<option value="${year}">${year}년</option>`)
+      ].join('');
+
+      if (years.map(String).includes(selected)) {
+        select.value = selected;
       }
+    }
 
-      if (status === "참가 완료") {
-        return "status-completed";
-      }
+    function renderYearComparison() {
+      const years = getManagedYears();
+      const data = years.map(year => {
+        const yearEvents = events.filter(event =>
+          (event.startDate || '').slice(0, 4) === String(year)
+        );
 
-      return "status-hold";
+        return {
+          year,
+          count: yearEvents.length,
+          cost: yearEvents.reduce((sum, event) => sum + parseCost(event.cost), 0)
+        };
+      });
+
+      const maxCost = Math.max(...data.map(item => item.cost), 0);
+      const totalCost = data.reduce((sum, item) => sum + item.cost, 0);
+      const totalCount = data.reduce((sum, item) => sum + item.count, 0);
+      const highest = data.reduce(
+        (best, item) => item.cost > best.cost ? item : best,
+        { year: 2026, count: 0, cost: 0 }
+      );
+
+      document.getElementById('comparisonSummary').innerHTML =
+        `누적 ${totalCount.toLocaleString('ko-KR')}건 · ${formatCost(totalCost)}`
+        + (highest.cost
+          ? `<br>최고 예산: ${highest.year}년 ${formatCost(highest.cost)}`
+          : '');
+
+      document.getElementById('yearChart').innerHTML = data.map(item => {
+        const height = maxCost > 0
+          ? Math.max(4, Math.round((item.cost / maxCost) * 100))
+          : 4;
+
+        return `
+          <div class="year-bar-card">
+            <div class="year-bar-value">${formatCost(item.cost)}</div>
+            <div class="year-bar-track">
+              <div class="year-bar" style="height:${height}%"
+                title="${item.year}년 예상비용 ${formatCost(item.cost)}"></div>
+            </div>
+            <div class="year-bar-label">
+              <strong>${item.year}년</strong>
+              <span>${item.count.toLocaleString('ko-KR')}건</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('comparisonTableWrap').innerHTML = `
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>연도</th>
+              <th>행사 수</th>
+              <th>예상비용</th>
+              <th>전년 대비</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map((item, index) => {
+              const previous = data[index - 1];
+              let change = '-';
+
+              if (previous) {
+                if (previous.cost === 0 && item.cost > 0) {
+                  change = '신규 발생';
+                } else if (previous.cost === 0 && item.cost === 0) {
+                  change = '0%';
+                } else {
+                  const rate = ((item.cost - previous.cost) / previous.cost) * 100;
+                  const sign = rate > 0 ? '+' : '';
+                  change = `${sign}${rate.toFixed(1)}%`;
+                }
+              }
+
+              return `
+                <tr>
+                  <td><strong>${item.year}년</strong></td>
+                  <td>${item.count.toLocaleString('ko-KR')}건</td>
+                  <td>${formatCost(item.cost)}</td>
+                  <td>${change}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
     }
 
     function renderEvents() {
-      const keyword = searchInput.value.trim().toLowerCase();
-      const selectedStatus = statusFilter.value;
-      const selectedType = typeFilter.value;
+      populateYearFilter();
+      const filtered = getFilteredEvents();
+      document.getElementById('resultCount').textContent = `${filtered.length}건`;
 
-      const filteredEvents = events.filter((event) => {
-        const searchableText = [
-          event.name,
-          event.country,
-          event.city,
-          event.manager
-        ]
-          .join(" ")
-          .toLowerCase();
-
-        const matchesKeyword = searchableText.includes(keyword);
-        const matchesStatus =
-          !selectedStatus || event.status === selectedStatus;
-        const matchesType =
-          !selectedType || event.type === selectedType;
-
-        return matchesKeyword && matchesStatus && matchesType;
-      });
-
-      eventTableBody.innerHTML = "";
-
-      if (filteredEvents.length === 0) {
-        emptyMessage.style.display = "block";
+      if (!filtered.length) {
+        eventList.innerHTML = '<div class="empty">조건에 맞는 행사가 없습니다.</div>';
+        updateStats();
+        renderYearComparison();
         return;
       }
 
-      emptyMessage.style.display = "none";
+      eventList.innerHTML = filtered.map(event => {
+        const participationClass =
+          event.participation === '참가 확정' ? 'success' :
+          event.participation === '불참' ? 'gray' : 'warning';
 
-      filteredEvents
-        .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
-        .forEach((event) => {
-          const row = document.createElement("tr");
+        return `
+          <article class="event-card" onclick="openDetail('${event.id}')">
+            <div class="event-card-top">
+              <div>
+                <h3>${escapeHTML(event.name || '행사명 미입력')}</h3>
+                <div class="badge-row">
+                  <span class="badge">${escapeHTML(event.type || '기타')}</span>
+                  <span class="badge ${participationClass}">${escapeHTML(event.participation || '검토 중')}</span>
+                  <span class="badge gray">${escapeHTML(event.status || '정보 수집')}</span>
+                </div>
+              </div>
 
-          const websiteLink = event.website
-            ? `<a href="${event.website}" target="_blank">바로가기</a>`
-            : "-";
+              <div class="card-actions">
+                <button class="btn secondary small" type="button"
+                  onclick="event.stopPropagation(); startEdit('${event.id}')">수정</button>
+                <button class="btn danger small" type="button"
+                  onclick="event.stopPropagation(); deleteEvent('${event.id}')">삭제</button>
+              </div>
+            </div>
 
-          row.innerHTML = `
-            <td>
-              <strong>${event.name}</strong>
-              ${
-                event.memo
-                  ? `<div style="margin-top:6px;color:#777;font-size:12px;">
-                      ${event.memo}
-                    </div>`
-                  : ""
-              }
-            </td>
+            <div class="event-meta">
+              <div class="meta-item">
+                <span>기간</span>
+                <strong>${formatDate(event.startDate)} ~ ${formatDate(event.endDate)}</strong>
+              </div>
+              <div class="meta-item">
+                <span>국가·도시</span>
+                <strong>${escapeHTML([event.country, event.city].filter(Boolean).join(' · ') || '-')}</strong>
+              </div>
+              <div class="meta-item">
+                <span>신청 마감일</span>
+                <strong>${formatDate(event.deadline)}</strong>
+              </div>
+              <div class="meta-item">
+                <span>예상 비용</span>
+                <strong>${formatCost(event.cost)}</strong>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
 
-            <td>${event.type}</td>
-
-            <td>
-              ${event.country || "-"}
-              ${event.city ? ` · ${event.city}` : ""}
-            </td>
-
-            <td>
-              ${formatDate(event.startDate)}
-              <br />
-              ~ ${formatDate(event.endDate)}
-            </td>
-
-            <td>${formatDate(event.deadline)}</td>
-
-            <td>${event.participation}</td>
-
-            <td>
-              <span class="status ${getStatusClass(event.status)}">
-                ${event.status}
-              </span>
-            </td>
-
-            <td>${event.manager || "-"}</td>
-
-            <td>${websiteLink}</td>
-
-            <td>
-              <button
-                class="delete-button"
-                onclick="deleteEvent('${event.id}')"
-              >
-                삭제
-              </button>
-            </td>
-          `;
-
-          eventTableBody.appendChild(row);
-        });
+      updateStats();
+      renderYearComparison();
     }
 
-    function deleteEvent(id) {
-      const confirmed = confirm("이 일정을 삭제할까요?");
+    function updateStats() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const deadlineLimit = new Date(today);
+      deadlineLimit.setDate(deadlineLimit.getDate() + 30);
 
-      if (!confirmed) return;
+      const planned = events.filter(event =>
+        ['참가 예정', '참가 확정'].includes(event.participation)
+      ).length;
 
-      events = events.filter((event) => event.id !== id);
+      const deadlines = events.filter(event => {
+        if (!event.deadline) return false;
+        const deadline = new Date(`${event.deadline}T00:00:00`);
+        return deadline >= today && deadline <= deadlineLimit;
+      }).length;
 
-      saveEvents();
-      renderEvents();
+      const totalCost = events.reduce((sum, event) => sum + parseCost(event.cost), 0);
+
+      document.getElementById('totalCount').textContent = events.length.toLocaleString('ko-KR');
+      document.getElementById('plannedCount').textContent = planned.toLocaleString('ko-KR');
+      document.getElementById('deadlineCount').textContent = deadlines.toLocaleString('ko-KR');
+      document.getElementById('totalCost').textContent = `${totalCost.toLocaleString('ko-KR')}원`;
     }
 
-    form.addEventListener("submit", function (event) {
+    function collectFormData() {
+      return {
+        name: document.getElementById('eventName').value.trim(),
+        type: document.getElementById('eventType').value,
+        country: document.getElementById('country').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        startDate: document.getElementById('startDate').value,
+        endDate: document.getElementById('endDate').value,
+        deadline: document.getElementById('deadline').value,
+        participation: document.getElementById('participation').value,
+        status: document.getElementById('status').value,
+        manager: document.getElementById('manager').value.trim(),
+        cost: parseCost(document.getElementById('cost').value),
+        website: document.getElementById('website').value.trim(),
+        memo: document.getElementById('memo').value.trim()
+      };
+    }
+
+    eventForm.addEventListener('submit', event => {
       event.preventDefault();
 
-      const startDate = document.getElementById("startDate").value;
-      const endDate = document.getElementById("endDate").value;
+      const data = collectFormData();
 
-      if (endDate < startDate) {
-        alert("종료일은 시작일보다 빠를 수 없습니다.");
+      if (data.endDate < data.startDate) {
+        alert('종료일은 시작일보다 빠를 수 없습니다.');
         return;
       }
 
-      const newEvent = {
-        id: Date.now().toString(),
-        name: document.getElementById("eventName").value.trim(),
-        type: document.getElementById("eventType").value,
-        country: document.getElementById("country").value.trim(),
-        city: document.getElementById("city").value.trim(),
-        startDate,
-        endDate,
-        deadline: document.getElementById("deadline").value,
-        status: document.getElementById("status").value,
-        manager: document.getElementById("manager").value.trim(),
-        cost: document.getElementById("cost").value.trim(),
-        website: document.getElementById("website").value.trim(),
-        participation: document.getElementById("participation").value,
-        memo: document.getElementById("memo").value.trim()
-      };
+      if (editingEventId) {
+        const index = events.findIndex(item => String(item.id) === String(editingEventId));
+        if (index === -1) {
+          alert('수정할 행사를 찾을 수 없습니다.');
+          cancelEdit();
+          return;
+        }
 
-      events.push(newEvent);
+        events[index] = {
+          ...events[index],
+          ...data,
+          updatedAt: new Date().toISOString()
+        };
+      } else {
+        events.push({
+          id: createId(),
+          ...data,
+          createdAt: new Date().toISOString(),
+          updatedAt: ''
+        });
+      }
 
       saveEvents();
+      cancelEdit();
       renderEvents();
-
-      form.reset();
-
-      alert("일정이 저장되었습니다.");
     });
 
-    searchInput.addEventListener("input", renderEvents);
-    statusFilter.addEventListener("change", renderEvents);
-    typeFilter.addEventListener("change", renderEvents);
+    function fillForm(event) {
+      document.getElementById('eventName').value = event.name || '';
+      document.getElementById('eventType').value = event.type || '';
+      document.getElementById('country').value = event.country || '';
+      document.getElementById('city').value = event.city || '';
+      document.getElementById('startDate').value = event.startDate || '';
+      document.getElementById('endDate').value = event.endDate || '';
+      document.getElementById('deadline').value = event.deadline || '';
+      document.getElementById('participation').value = event.participation || '검토 중';
+      document.getElementById('status').value = event.status || '정보 수집';
+      document.getElementById('manager').value = event.manager || '';
+      document.getElementById('cost').value = event.cost || '';
+      document.getElementById('website').value = event.website || '';
+      document.getElementById('memo').value = event.memo || '';
+    }
+
+    function startEdit(id) {
+      const target = events.find(event => String(event.id) === String(id));
+      if (!target) return;
+
+      editingEventId = target.id;
+      fillForm(target);
+
+      document.getElementById('formTitle').textContent = '일정 수정';
+      document.getElementById('submitButton').textContent = '수정 완료';
+      document.getElementById('cancelEditButton').hidden = false;
+
+      closeDetail();
+      document.getElementById('eventForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('eventName').focus({ preventScroll: true });
+    }
+
+    function cancelEdit() {
+      editingEventId = null;
+      eventForm.reset();
+      document.getElementById('participation').value = '검토 중';
+      document.getElementById('status').value = '정보 수집';
+      document.getElementById('formTitle').textContent = '일정 등록';
+      document.getElementById('submitButton').textContent = '일정 등록';
+      document.getElementById('cancelEditButton').hidden = true;
+    }
+
+    document.getElementById('cancelEditButton').addEventListener('click', cancelEdit);
+
+    function deleteEvent(id) {
+      const target = events.find(event => String(event.id) === String(id));
+      if (!target) return;
+
+      if (!confirm(`"${target.name}" 일정을 삭제할까요?`)) return;
+
+      events = events.filter(event => String(event.id) !== String(id));
+      saveEvents();
+
+      if (String(editingEventId) === String(id)) cancelEdit();
+      if (String(selectedEventId) === String(id)) closeDetail();
+
+      renderEvents();
+    }
+
+    function openDetail(id) {
+      const event = events.find(item => String(item.id) === String(id));
+      if (!event) {
+        alert('행사 정보를 찾을 수 없습니다.');
+        return;
+      }
+
+      selectedEventId = event.id;
+      document.getElementById('detailTitle').textContent = event.name || '행사 상세정보';
+
+      const website = safeURL(event.website);
+      document.getElementById('detailBody').innerHTML = `
+        <div class="detail-grid">
+          ${detailItem('구분', event.type)}
+          ${detailItem('참가 여부', event.participation)}
+          ${detailItem('국가', event.country)}
+          ${detailItem('도시', event.city)}
+          ${detailItem('시작일', formatDate(event.startDate))}
+          ${detailItem('종료일', formatDate(event.endDate))}
+          ${detailItem('신청 마감일', formatDate(event.deadline))}
+          ${detailItem('진행 상태', event.status)}
+          ${detailItem('담당자', event.manager)}
+          ${detailItem('예상 비용', formatCost(event.cost))}
+          <div class="detail-item full">
+            <span>공식 홈페이지</span>
+            ${website
+              ? `<a href="${escapeHTML(website)}" target="_blank" rel="noopener noreferrer">${escapeHTML(website)}</a>`
+              : '<strong>-</strong>'}
+          </div>
+          ${detailItem('메모', event.memo, true)}
+        </div>
+      `;
+
+      detailModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function detailItem(label, value, full = false) {
+      return `
+        <div class="detail-item ${full ? 'full' : ''}">
+          <span>${escapeHTML(label)}</span>
+          <strong>${escapeHTML(value || '-')}</strong>
+        </div>
+      `;
+    }
+
+    function closeDetail() {
+      detailModal.classList.remove('show');
+      document.body.style.overflow = '';
+      selectedEventId = null;
+    }
+
+    function editSelectedEvent() {
+      if (selectedEventId) startEdit(selectedEventId);
+    }
+
+    detailModal.addEventListener('click', event => {
+      if (event.target === detailModal) closeDetail();
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') closeDetail();
+    });
+
+    ['searchInput', 'yearFilter', 'typeFilter', 'participationFilter', 'sortFilter'].forEach(id => {
+      document.getElementById(id).addEventListener('input', renderEvents);
+      document.getElementById(id).addEventListener('change', renderEvents);
+    });
+
+    function downloadCSV() {
+      if (!events.length) {
+        alert('다운로드할 행사 데이터가 없습니다.');
+        return;
+      }
+
+      const headers = [
+        '행사명', '구분', '국가', '도시', '시작일', '종료일',
+        '신청 마감일', '참가 여부', '진행 상태', '담당자',
+        '예상 비용', '공식 홈페이지', '메모'
+      ];
+
+      const rows = events.map(event => [
+        event.name,
+        event.type,
+        event.country,
+        event.city,
+        event.startDate,
+        event.endDate,
+        event.deadline,
+        event.participation,
+        event.status,
+        event.manager,
+        parseCost(event.cost),
+        event.website,
+        event.memo
+      ]);
+
+      const csv = [headers, ...rows]
+        .map(row => row.map(csvCell).join(','))
+        .join('\n');
+
+      downloadBlob(
+        new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }),
+        `exhibition-conference-calendar_${todayString()}.csv`
+      );
+    }
+
+    function csvCell(value) {
+      return `"${String(value ?? '').replaceAll('"', '""')}"`;
+    }
+
+    function exportBackup() {
+      const backup = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        events
+      };
+
+      downloadBlob(
+        new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }),
+        `exhibition-conference-backup_${todayString()}.json`
+      );
+    }
+
+    function downloadBlob(blob, filename) {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function todayString() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    importFile.addEventListener('change', async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      try {
+        const data = JSON.parse(await file.text());
+        const importedEvents = Array.isArray(data) ? data : data.events;
+
+        if (!Array.isArray(importedEvents)) {
+          throw new Error('올바른 행사 데이터가 아닙니다.');
+        }
+
+        if (!confirm(`현재 데이터를 지우고 ${importedEvents.length}건을 불러올까요?`)) {
+          importFile.value = '';
+          return;
+        }
+
+        events = importedEvents.map(normalizeEvent);
+        saveEvents();
+        cancelEdit();
+        renderEvents();
+        alert('데이터를 불러왔습니다.');
+      } catch (error) {
+        alert(`불러오기 실패: ${error.message}`);
+      } finally {
+        importFile.value = '';
+      }
+    });
 
     renderEvents();
   </script>
