@@ -82,7 +82,7 @@
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 14px;
       margin-bottom: 20px;
     }
@@ -254,7 +254,7 @@
 
     .toolbar {
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) repeat(4, minmax(120px, 0.32fr));
+      grid-template-columns: minmax(220px, 1fr) repeat(5, minmax(110px, 0.3fr));
       gap: 10px;
       margin-bottom: 18px;
     }
@@ -681,11 +681,15 @@
         <strong id="plannedCount">0</strong>
       </div>
       <div class="stat-card">
-        <span>신청 마감 임박</span>
-        <strong id="deadlineCount">0</strong>
+        <span>국내 예상비용</span>
+        <strong id="domesticCost">0원</strong>
       </div>
       <div class="stat-card">
-        <span>총 예상 비용</span>
+        <span>해외 예상비용</span>
+        <strong id="overseasCost">0원</strong>
+      </div>
+      <div class="stat-card">
+        <span>총 예상비용</span>
         <strong id="totalCost">0원</strong>
       </div>
     </section>
@@ -693,14 +697,27 @@
     <section class="panel year-comparison">
       <div class="comparison-head">
         <div>
-          <h2>연도별 예상비용 비교</h2>
-          <p>행사 시작일을 기준으로 연도별 행사 수와 예상비용을 비교합니다.</p>
+          <h2>국내 연도별 예상비용 비교</h2>
+          <p>국내 행사 시작일을 기준으로 연도별 예상비용을 비교합니다.</p>
         </div>
-        <div id="comparisonSummary" class="comparison-summary"></div>
+        <div id="domesticComparisonSummary" class="comparison-summary"></div>
       </div>
 
-      <div id="yearChart" class="year-chart"></div>
-      <div id="comparisonTableWrap" class="comparison-table-wrap"></div>
+      <div id="domesticYearChart" class="year-chart"></div>
+      <div id="domesticComparisonTableWrap" class="comparison-table-wrap"></div>
+    </section>
+
+    <section class="panel year-comparison">
+      <div class="comparison-head">
+        <div>
+          <h2>해외 연도별 예상비용 비교</h2>
+          <p>해외 행사 시작일을 기준으로 연도별 예상비용을 비교합니다.</p>
+        </div>
+        <div id="overseasComparisonSummary" class="comparison-summary"></div>
+      </div>
+
+      <div id="overseasYearChart" class="year-chart"></div>
+      <div id="overseasComparisonTableWrap" class="comparison-table-wrap"></div>
     </section>
 
     <section class="layout">
@@ -720,6 +737,15 @@
             <label for="yearFilter">연도</label>
             <select id="yearFilter">
               <option value="">전체 연도</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="regionFilter">국내외</label>
+            <select id="regionFilter">
+              <option value="">전체</option>
+              <option value="국내">국내</option>
+              <option value="해외">해외</option>
             </select>
           </div>
 
@@ -785,6 +811,15 @@
                 <option value="학회">학회</option>
                 <option value="세미나">세미나</option>
                 <option value="기타">기타</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="region">국내외 *</label>
+              <select id="region" required>
+                <option value="">선택</option>
+                <option value="국내">국내</option>
+                <option value="해외">해외</option>
               </select>
             </div>
 
@@ -1015,6 +1050,7 @@
     function getFilteredEvents() {
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
       const year = document.getElementById('yearFilter').value;
+      const region = document.getElementById('regionFilter').value;
       const type = document.getElementById('typeFilter').value;
       const participation = document.getElementById('participationFilter').value;
       const sort = document.getElementById('sortFilter').value;
@@ -1034,6 +1070,7 @@
 
         return (!keyword || haystack.includes(keyword))
           && (!year || eventYear === year)
+          && (!region || event.region === region)
           && (!type || event.type === type)
           && (!participation || event.participation === participation);
       });
@@ -1075,34 +1112,62 @@
     }
 
     function renderYearComparison() {
+      renderRegionYearComparison(
+        '국내',
+        'domesticComparisonSummary',
+        'domesticYearChart',
+        'domesticComparisonTableWrap',
+        '#2b8a3e',
+        '#17652a'
+      );
+
+      renderRegionYearComparison(
+        '해외',
+        'overseasComparisonSummary',
+        'overseasYearChart',
+        'overseasComparisonTableWrap',
+        '#1667d9',
+        '#0f4fae'
+      );
+    }
+
+    function renderRegionYearComparison(
+      region,
+      summaryId,
+      chartId,
+      tableId,
+      startColor,
+      endColor
+    ) {
       const years = getManagedYears();
+
       const data = years.map(year => {
         const yearEvents = events.filter(event =>
-          (event.startDate || '').slice(0, 4) === String(year)
+          event.region === region
+          && (event.startDate || '').slice(0, 4) === String(year)
+        );
+
+        const cost = yearEvents.reduce(
+          (sum, event) => sum + parseCost(event.cost),
+          0
         );
 
         return {
           year,
           count: yearEvents.length,
-          cost: yearEvents.reduce((sum, event) => sum + parseCost(event.cost), 0)
+          cost
         };
       });
 
       const maxCost = Math.max(...data.map(item => item.cost), 0);
       const totalCost = data.reduce((sum, item) => sum + item.cost, 0);
       const totalCount = data.reduce((sum, item) => sum + item.count, 0);
-      const highest = data.reduce(
-        (best, item) => item.cost > best.cost ? item : best,
-        { year: 2026, count: 0, cost: 0 }
-      );
 
-      document.getElementById('comparisonSummary').innerHTML =
-        `누적 ${totalCount.toLocaleString('ko-KR')}건 · ${formatCost(totalCost)}`
-        + (highest.cost
-          ? `<br>최고 예산: ${highest.year}년 ${formatCost(highest.cost)}`
-          : '');
+      document.getElementById(summaryId).innerHTML =
+        `누적 ${totalCount.toLocaleString('ko-KR')}건`
+        + `<br>${formatCost(totalCost)}`;
 
-      document.getElementById('yearChart').innerHTML = data.map(item => {
+      document.getElementById(chartId).innerHTML = data.map(item => {
         const height = maxCost > 0
           ? Math.max(4, Math.round((item.cost / maxCost) * 100))
           : 4;
@@ -1110,10 +1175,15 @@
         return `
           <div class="year-bar-card">
             <div class="year-bar-value">${formatCost(item.cost)}</div>
+
             <div class="year-bar-track">
-              <div class="year-bar" style="height:${height}%"
-                title="${item.year}년 예상비용 ${formatCost(item.cost)}"></div>
+              <div
+                class="year-bar"
+                style="height:${height}%; background:linear-gradient(180deg,${startColor},${endColor});"
+                title="${item.year}년 ${region} 예상비용 ${formatCost(item.cost)}">
+              </div>
             </div>
+
             <div class="year-bar-label">
               <strong>${item.year}년</strong>
               <span>${item.count.toLocaleString('ko-KR')}건</span>
@@ -1122,7 +1192,7 @@
         `;
       }).join('');
 
-      document.getElementById('comparisonTableWrap').innerHTML = `
+      document.getElementById(tableId).innerHTML = `
         <table class="comparison-table">
           <thead>
             <tr>
@@ -1187,6 +1257,7 @@
                 <h3>${escapeHTML(event.name || '행사명 미입력')}</h3>
                 <div class="badge-row">
                   <span class="badge">${escapeHTML(event.type || '기타')}</span>
+                  <span class="badge gray">${escapeHTML(event.region || '미분류')}</span>
                   <span class="badge ${participationClass}">${escapeHTML(event.participation || '검토 중')}</span>
                   <span class="badge gray">${escapeHTML(event.status || '정보 수집')}</span>
                 </div>
@@ -1227,33 +1298,41 @@
     }
 
     function updateStats() {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const deadlineLimit = new Date(today);
-      deadlineLimit.setDate(deadlineLimit.getDate() + 30);
-
       const planned = events.filter(event =>
         ['참가 예정', '참가 확정'].includes(event.participation)
       ).length;
 
-      const deadlines = events.filter(event => {
-        if (!event.deadline) return false;
-        const deadline = new Date(`${event.deadline}T00:00:00`);
-        return deadline >= today && deadline <= deadlineLimit;
-      }).length;
+      const domesticCost = events
+        .filter(event => event.region === '국내')
+        .reduce((sum, event) => sum + parseCost(event.cost), 0);
 
-      const totalCost = events.reduce((sum, event) => sum + parseCost(event.cost), 0);
+      const overseasCost = events
+        .filter(event => event.region === '해외')
+        .reduce((sum, event) => sum + parseCost(event.cost), 0);
 
-      document.getElementById('totalCount').textContent = events.length.toLocaleString('ko-KR');
-      document.getElementById('plannedCount').textContent = planned.toLocaleString('ko-KR');
-      document.getElementById('deadlineCount').textContent = deadlines.toLocaleString('ko-KR');
-      document.getElementById('totalCost').textContent = `${totalCost.toLocaleString('ko-KR')}원`;
+      const totalCost = domesticCost + overseasCost;
+
+      document.getElementById('totalCount').textContent =
+        events.length.toLocaleString('ko-KR');
+
+      document.getElementById('plannedCount').textContent =
+        planned.toLocaleString('ko-KR');
+
+      document.getElementById('domesticCost').textContent =
+        formatCost(domesticCost);
+
+      document.getElementById('overseasCost').textContent =
+        formatCost(overseasCost);
+
+      document.getElementById('totalCost').textContent =
+        formatCost(totalCost);
     }
 
     function collectFormData() {
       return {
         name: document.getElementById('eventName').value.trim(),
         type: document.getElementById('eventType').value,
+        region: document.getElementById('region').value,
         country: document.getElementById('country').value.trim(),
         city: document.getElementById('city').value.trim(),
         startDate: document.getElementById('startDate').value,
@@ -1317,6 +1396,7 @@ ${error.message}`);
     function fillForm(event) {
       document.getElementById('eventName').value = event.name || '';
       document.getElementById('eventType').value = event.type || '';
+      document.getElementById('region').value = event.region || '';
       document.getElementById('country').value = event.country || '';
       document.getElementById('city').value = event.city || '';
       document.getElementById('startDate').value = event.startDate || '';
@@ -1349,6 +1429,7 @@ ${error.message}`);
     function cancelEdit() {
       editingEventId = null;
       eventForm.reset();
+      document.getElementById('region').value = '';
       document.getElementById('participation').value = '검토 중';
       document.getElementById('status').value = '정보 수집';
       document.getElementById('formTitle').textContent = '일정 등록';
@@ -1398,6 +1479,7 @@ ${error.message}`);
       document.getElementById('detailBody').innerHTML = `
         <div class="detail-grid">
           ${detailItem('구분', event.type)}
+          ${detailItem('국내외', event.region)}
           ${detailItem('참가 여부', event.participation)}
           ${detailItem('국가', event.country)}
           ${detailItem('도시', event.city)}
@@ -1448,7 +1530,7 @@ ${error.message}`);
       if (event.key === 'Escape') closeDetail();
     });
 
-    ['searchInput', 'yearFilter', 'typeFilter', 'participationFilter', 'sortFilter'].forEach(id => {
+    ['searchInput', 'yearFilter', 'regionFilter', 'typeFilter', 'participationFilter', 'sortFilter'].forEach(id => {
       document.getElementById(id).addEventListener('input', renderEvents);
       document.getElementById(id).addEventListener('change', renderEvents);
     });
@@ -1460,7 +1542,7 @@ ${error.message}`);
       }
 
       const headers = [
-        '행사명', '구분', '국가', '도시', '시작일', '종료일',
+        '행사명', '구분', '국내외', '국가', '도시', '시작일', '종료일',
         '신청 마감일', '참가 여부', '진행 상태', '담당자',
         '예상 비용', '공식 홈페이지', '메모'
       ];
@@ -1468,6 +1550,7 @@ ${error.message}`);
       const rows = events.map(event => [
         event.name,
         event.type,
+        event.region,
         event.country,
         event.city,
         event.startDate,
