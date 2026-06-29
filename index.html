@@ -1143,7 +1143,8 @@
 
       const data = years.map(year => {
         const yearEvents = events.filter(event =>
-          event.region === region
+          event.participation !== '불참'
+          && event.region === region
           && (event.startDate || '').slice(0, 4) === String(year)
         );
 
@@ -1303,11 +1304,11 @@
       ).length;
 
       const domesticCost = events
-        .filter(event => event.region === '국내')
+        .filter(event => event.participation !== '불참' && event.region === '국내')
         .reduce((sum, event) => sum + parseCost(event.cost), 0);
 
       const overseasCost = events
-        .filter(event => event.region === '해외')
+        .filter(event => event.participation !== '불참' && event.region === '해외')
         .reduce((sum, event) => sum + parseCost(event.cost), 0);
 
       const totalCost = domesticCost + overseasCost;
