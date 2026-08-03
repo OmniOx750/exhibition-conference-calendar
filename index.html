@@ -418,6 +418,48 @@
       margin-bottom: 20px;
     }
 
+    .timeline-head-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .timeline-filters {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.66);
+    }
+
+    .timeline-filter-btn {
+      min-width: 58px;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      transition: color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    .timeline-filter-btn:hover {
+      color: var(--text);
+      background: rgba(255,255,255,.74);
+    }
+
+    .timeline-filter-btn.active {
+      color: var(--primary-dark);
+      background: #fff;
+      box-shadow: 0 5px 14px rgba(15,23,42,.09);
+    }
+
     .timeline-wrap {
       overflow-x: auto;
       padding: 8px 4px 12px;
@@ -793,6 +835,9 @@
       .panel { padding: 20px; border-radius: 24px; }
       .section-head { align-items: flex-start; flex-direction: column; }
       .section-meta { text-align: left; }
+      .timeline-head-actions { width: 100%; align-items: flex-start; justify-content: flex-start; }
+      .timeline-filters { width: 100%; }
+      .timeline-filter-btn { flex: 1; }
       .event-top { flex-direction: column; }
       .card-actions { width: 100%; }
       .card-actions .btn { flex: 1; }
@@ -894,7 +939,14 @@
           <h2>전시회·학회 타임라인</h2>
           <p>현재 검색 및 필터 조건에 맞는 일정을 시작일 순으로 확인합니다.</p>
         </div>
-        <div class="section-meta">가로 스크롤</div>
+        <div class="timeline-head-actions">
+          <div class="timeline-filters" role="group" aria-label="타임라인 국내외 필터">
+            <button class="timeline-filter-btn active" type="button" data-region="" aria-pressed="true" onclick="setTimelineRegion('')">전체</button>
+            <button class="timeline-filter-btn" type="button" data-region="국내" aria-pressed="false" onclick="setTimelineRegion('국내')">국내</button>
+            <button class="timeline-filter-btn" type="button" data-region="해외" aria-pressed="false" onclick="setTimelineRegion('해외')">해외</button>
+          </div>
+          <div id="timelineMeta" class="section-meta">0건 · 가로 스크롤</div>
+        </div>
       </div>
       <div class="timeline-wrap">
         <div id="eventTimeline" class="timeline"></div>
@@ -1256,9 +1308,33 @@
       }).join('');
     }
 
+    function updateTimelineRegionButtons() {
+      const selectedRegion = document.getElementById('regionFilter').value;
+      document.querySelectorAll('.timeline-filter-btn').forEach(button => {
+        const isActive = button.dataset.region === selectedRegion;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+    }
+
+    function setTimelineRegion(region) {
+      document.getElementById('regionFilter').value = region;
+      renderEvents();
+    }
+
     function renderTimeline(filteredEvents) {
-      const list = [...filteredEvents].filter(e => e.startDate).sort((a,b) => a.startDate.localeCompare(b.startDate)).slice(0,20);
+      const timelineEvents = [...filteredEvents]
+        .filter(e => e.startDate)
+        .sort((a,b) => a.startDate.localeCompare(b.startDate));
+      const list = timelineEvents.slice(0,20);
       const wrap = document.getElementById('eventTimeline');
+      const timelineMeta = document.getElementById('timelineMeta');
+
+      updateTimelineRegionButtons();
+      timelineMeta.textContent = timelineEvents.length > 20
+        ? `${list.length}/${timelineEvents.length}건 · 가로 스크롤`
+        : `${timelineEvents.length}건 · 가로 스크롤`;
+
       if (!list.length) {
         wrap.innerHTML = '<div class="empty" style="width:100%;">표시할 일정이 없습니다.</div>';
         return;
