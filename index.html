@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exhibition Performance & Lead Management</title>
+  <title>Exhibition Performance & Lead Management V4</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
@@ -126,7 +126,7 @@
   <section id="dashboardView" class="view active">
     <section class="hero">
       <div class="hero-grid">
-        <div><div class="eyebrow">EXHIBITION PERFORMANCE & LEAD MANAGEMENT</div><h1>멕아이씨에스<br>전시회/학회 관리</h1><p>전시회·학회의 일정과 비용뿐 아니라 행사에서 확보한 업체, Follow-up 진행상태, 실제 성과와 차년도 인사이트까지 연결해 관리합니다.</p></div>
+        <div><div class="eyebrow">EXHIBITION PERFORMANCE & LEAD MANAGEMENT</div><h1>행사가 끝난 뒤의<br>성과까지 관리합니다.</h1><p>전시회·학회의 일정과 비용뿐 아니라 행사에서 확보한 업체, Follow-up 진행상태, 실제 성과와 차년도 인사이트까지 연결해 관리합니다.</p></div>
         <div class="kpi-grid">
           <div class="kpi"><span>올해 행사</span><strong id="kpiEvents">0</strong><small>전체 등록 행사</small></div>
           <div class="kpi"><span>확보 업체</span><strong id="kpiLeads">0</strong><small>Lead 총합</small></div>
@@ -175,7 +175,7 @@
 
       <aside class="panel glass">
         <div class="section-head"><div><h2 id="formTitle">일정 등록</h2><p>구글 시트 Events 데이터에 저장합니다.</p></div></div>
-        <div class="notice">행사 기본정보는 기존 데이터 구조를 유지합니다.<div id="syncStatus" class="sync-status">연결 확인 중...</div></div>
+        <div class="notice">기존 Events 시트의 한글 컬럼 구조를 그대로 사용합니다.<div id="syncStatus" class="sync-status">연결 확인 중...</div></div>
         <form id="eventForm"><div class="form-grid">
           <div class="field full"><label>행사명 *</label><input id="eventName" required></div>
           <div class="field"><label>구분 *</label><select id="eventType" required><option value="">선택</option><option>전시회</option><option>학회</option><option>세미나</option><option>기타</option></select></div>
