@@ -345,6 +345,26 @@ function renderDashboard(){
   document.getElementById('fuActive').textContent=active;document.getElementById('fuUntouched').textContent=untouched;document.getElementById('fuComplete').textContent=complete;document.getElementById('fuActiveSub').textContent=`전체 ${leads.length}개 Lead 중`;
   renderBudget();renderUpcoming();renderPerformance();
 }
+function renderBudget(){
+  const activeEvents=events.filter(e=>e.participation!=='불참');
+  const domestic=activeEvents.filter(e=>e.region==='국내');
+  const overseas=activeEvents.filter(e=>e.region==='해외');
+  const domesticCost=domestic.reduce((s,e)=>s+parseCost(e.cost),0);
+  const overseasCost=overseas.reduce((s,e)=>s+parseCost(e.cost),0);
+  const totalCost=domesticCost+overseasCost;
+  const actualRows=insights.filter(i=>parseCost(i.actualCost)>0);
+  const actualCost=actualRows.reduce((s,i)=>s+parseCost(i.actualCost),0);
+
+  document.getElementById('budgetDomestic').textContent=formatCost(domesticCost);
+  document.getElementById('budgetOverseas').textContent=formatCost(overseasCost);
+  document.getElementById('budgetTotal').textContent=formatCost(totalCost);
+  document.getElementById('budgetActual').textContent=formatCost(actualCost);
+  document.getElementById('budgetDomesticSub').textContent=`${domestic.length}건`;
+  document.getElementById('budgetOverseasSub').textContent=`${overseas.length}건`;
+  document.getElementById('budgetEventCount').textContent=`${activeEvents.length}건 기준`;
+  document.getElementById('budgetActualSub').textContent=actualRows.length?`${actualRows.length}개 행사 실제비용 입력`:'아직 실제비용 입력 없음';
+}
+
 function renderUpcoming(){
   const a=events.filter(e=>{const d=daysUntil(e.startDate);return e.participation!=='불참'&&d!==null&&d>=0&&d<=60}).sort((x,y)=>x.startDate.localeCompare(y.startDate)).slice(0,4);
   document.getElementById('upcomingCount').textContent=`${a.length}건`;const w=document.getElementById('upcomingEvents');if(!a.length){w.innerHTML='<div class="empty" style="grid-column:1/-1">60일 이내 시작하는 일정이 없습니다.</div>';return}
