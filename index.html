@@ -100,7 +100,18 @@
     .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.72)} table{width:100%;border-collapse:collapse;font-size:11px;min-width:1150px}
     th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap} th{position:sticky;top:0;z-index:2;background:#f8fafc;color:var(--muted);font-weight:850}
     td.wrap{white-space:normal;min-width:180px} .inline-select{height:34px;min-width:115px;padding:0 8px;border-radius:10px} .inline-date{height:34px;min-width:130px;padding:0 8px}
-    .insight-layout{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:18px} .score-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+    .insight-layout{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:18px}
+    .insight-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
+    .insight-leads{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.62)}
+    .insight-leads-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .insight-leads-head h3{margin:0;font-size:13px}
+    .insight-lead-list{display:grid;gap:8px}
+    .insight-lead-row{display:grid;grid-template-columns:minmax(150px,1.2fr) .65fr .9fr .85fr auto;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:13px;background:#fff}
+    .insight-lead-row .company{min-width:0}
+    .insight-lead-row .company strong{display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .insight-lead-row .company span{display:block;margin-top:3px;color:var(--muted);font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .insight-lead-row select,.insight-lead-row input{height:32px;padding:0 7px;font-size:10px;border-radius:9px}
+ .score-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
     .score-card{padding:15px;border-radius:17px;background:var(--soft);border:1px solid var(--line)} .score-card span{display:block;color:var(--muted);font-size:10px} .score-card strong{display:block;margin-top:5px;font-size:22px}
     .rating-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px} .insight-summary{padding:20px;border-radius:22px;background:linear-gradient(135deg,#111827,#273449);color:#fff}
     .insight-summary h3{margin:0 0 14px;font-size:20px} .insight-summary .perf-row{border-color:rgba(255,255,255,.12)} .insight-summary .perf-row span{color:rgba(255,255,255,.62)}
@@ -111,7 +122,7 @@
     .modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}
     .loading-overlay{display:none;position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;background:rgba(255,255,255,.74);backdrop-filter:blur(5px)} .loading-overlay.show{display:flex} .loading-box{padding:17px 21px;border-radius:15px;background:#fff;box-shadow:var(--shadow-lg);font-weight:800}
     @media(max-width:1180px){.hero-grid,.dashboard-grid,.content-grid,.insight-layout{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}.toolbar{grid-template-columns:repeat(3,1fr)}.performance-grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:760px){.app{width:min(100% - 16px,1540px);padding-top:8px}.topbar{position:static;align-items:flex-start;flex-direction:column}.hero{padding:26px 20px;border-radius:25px}.kpi-grid,.upcoming-grid,.fu-summary,.performance-grid,.toolbar,.fu-toolbar,.form-grid,.event-meta,.detail-grid,.score-grid,.rating-grid{grid-template-columns:1fr}.panel{padding:19px;border-radius:23px}.section-head{align-items:flex-start;flex-direction:column}.section-meta{text-align:left}.event-top{flex-direction:column}.card-actions{width:100%}.card-actions .btn{flex:1}}
+    @media(max-width:760px){.app{width:min(100% - 16px,1540px);padding-top:8px}.topbar{position:static;align-items:flex-start;flex-direction:column}.hero{padding:26px 20px;border-radius:25px}.kpi-grid,.upcoming-grid,.fu-summary,.performance-grid,.toolbar,.fu-toolbar,.form-grid,.event-meta,.detail-grid,.score-grid,.rating-grid,.insight-lead-row{grid-template-columns:1fr}.panel{padding:19px;border-radius:23px}.section-head{align-items:flex-start;flex-direction:column}.section-meta{text-align:left}.event-top{flex-direction:column}.card-actions{width:100%}.card-actions .btn{flex:1}}
   </style>
 </head>
 <body>
@@ -257,7 +268,12 @@
   <section id="insightView" class="view">
     <section class="panel glass">
       <div class="section-head"><div><h2>Post Event Insight</h2><p>비용 적정성, 시장성, 가능성 있는 업체와 현장 인사이트를 행사별로 기록합니다.</p></div></div>
-      <div class="field" style="max-width:420px;margin-bottom:18px"><label>분석할 행사</label><select id="insightEventSelect"><option value="">행사를 선택하세요</option></select></div>
+      <div class="field" style="max-width:420px"><label>분석할 행사</label><select id="insightEventSelect"><option value="">행사를 선택하세요</option></select></div>
+      <div class="insight-actions">
+        <button class="btn" type="button" onclick="openInsightDirectLead()">+ 업체 직접 등록</button>
+        <button class="btn secondary" type="button" onclick="uploadInsightLeads()">Excel 일괄 등록</button>
+        <button class="btn secondary" type="button" onclick="goInsightLeadPipeline()">전체 Lead 관리</button>
+      </div>
       <div class="insight-layout">
         <div>
           <div class="score-grid">
@@ -267,6 +283,15 @@
             <div class="score-card"><span>Hot Lead</span><strong id="insHot">0</strong></div>
           </div>
           <div id="insightAutoSummary" class="insight-summary"><h3>행사를 선택해 주세요.</h3></div>
+          <div class="insight-leads">
+            <div class="insight-leads-head">
+              <h3>행사 Lead 빠른 관리</h3>
+              <span id="insightLeadCount" class="section-meta">0건</span>
+            </div>
+            <div id="insightLeadManager" class="insight-lead-list">
+              <div class="empty">행사를 선택하면 Lead가 표시됩니다.</div>
+            </div>
+          </div>
         </div>
 
         <form id="insightForm">
@@ -401,7 +426,7 @@
 
 <script>
 const GOOGLE_SCRIPT_URL='https://script.google.com/macros/s/AKfycbzhVZhKcqhNf1jxeWLTLf-Off60fcL66p9Uvwv4Pkm5pZ02Fm7Tgkl8B-tdlR1WuQlm/exec';
-let events=[], leads=[], insights=[], editingEventId=null, selectedEventId=null;
+let events=[], leads=[], insights=[], editingEventId=null, selectedEventId=null, pendingInsightUploadEventId='';
 const leadStatuses=['미접촉','1차 컨택','회신 대기','협의 중','견적·제안','샘플·데모','완료','보류','종료'];
 const leadGrades=['Hot','Warm','Cold'];
 
@@ -514,12 +539,12 @@ function renderLeads(){
   leadTableBody.innerHTML=a.map(l=>`<tr><td>${escapeHTML(l.eventName)}</td><td><strong>${escapeHTML(l.company)}</strong></td><td>${escapeHTML(l.country)}</td><td>${escapeHTML(l.companyType)}</td><td class="wrap">${escapeHTML(l.products)}</td><td><select class="inline-select" id="grade_${l.id}">${leadGrades.map(x=>`<option ${l.grade===x?'selected':''}>${x}</option>`).join('')}</select></td><td><select class="inline-select" id="status_${l.id}">${leadStatuses.map(x=>`<option ${l.followUpStatus===x?'selected':''}>${x}</option>`).join('')}</select></td><td class="wrap"><input style="min-width:180px;height:34px" id="last_${l.id}" value="${escapeHTML(l.lastAction)}"></td><td><input class="inline-date" type="date" id="next_${l.id}" value="${escapeHTML(l.nextActionDate)}"></td><td>${escapeHTML(l.owner)}</td><td>${escapeHTML(l.email||l.phone||'-')}</td><td><button class="btn small" onclick="saveLeadRow('${l.id}')">저장</button></td></tr>`).join('')
 }
 
-function openDirectLeadModal(){
+function openDirectLeadModal(preselectedEventId=''){
   const form=document.getElementById('directLeadForm');
   form.reset();
   document.getElementById('directLeadGrade').value='Warm';
   document.getElementById('directLeadStatus').value='미접촉';
-  const filterEvent=document.getElementById('leadEventFilter').value;
+  const filterEvent=preselectedEventId||document.getElementById('leadEventFilter').value;
   if(filterEvent&&events.some(e=>String(e.id)===String(filterEvent))){
     document.getElementById('directLeadEvent').value=filterEvent;
   }
@@ -583,18 +608,153 @@ document.getElementById('directLeadForm').addEventListener('submit',async e=>{
 
 async function saveLeadRow(id){const l=leads.find(x=>String(x.id)===String(id));if(!l)return;const updated={...l,grade:document.getElementById('grade_'+id).value,followUpStatus:document.getElementById('status_'+id).value,lastAction:document.getElementById('last_'+id).value.trim(),nextActionDate:document.getElementById('next_'+id).value};try{setLoading(true,'F/U 저장 중...');await apiPost({action:'updateLead',lead:updated});await bootstrapData()}catch(e){alert(e.message)}finally{setLoading(false)}}
 
-leadExcelInput.addEventListener('change',async ev=>{const f=ev.target.files[0];if(!f)return;try{setLoading(true,'Excel을 분석하는 중...');const data=await f.arrayBuffer();const wb=XLSX.read(data,{type:'array',cellDates:true});const sh=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(sh,{defval:''});if(!rows.length)throw new Error('업로드할 데이터가 없습니다.');const mapped=rows.map(mapExcelLead).filter(x=>x.company);if(!mapped.length)throw new Error('회사명이 있는 데이터가 없습니다.');if(!confirm(`${mapped.length}개 업체를 등록/업데이트할까요?`))return;setLoading(true,`${mapped.length}개 업체를 구글 시트에 저장하는 중...`);const r=await apiPost({action:'bulkUpsertLeads',leads:mapped});const x=r.result;alert(`업로드 완료\n신규 ${x.created}건 / 업데이트 ${x.updated}건 / 제외 ${x.skipped}건`+(x.errors?.length?'\n\n오류: '+x.errors.slice(0,5).map(e=>`${e.row}행 ${e.message}`).join('\n'):''));await bootstrapData()}catch(e){console.error(e);alert('Excel 업로드 실패: '+e.message)}finally{setLoading(false);ev.target.value=''}});
+leadExcelInput.addEventListener('change',async ev=>{
+  const f=ev.target.files[0];
+  if(!f)return;
+  try{
+    setLoading(true,'Excel을 분석하는 중...');
+    const data=await f.arrayBuffer();
+    const wb=XLSX.read(data,{type:'array',cellDates:true});
+    const sh=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(sh,{defval:''});
+    if(!rows.length)throw new Error('업로드할 데이터가 없습니다.');
+
+    const insightEvent=pendingInsightUploadEventId
+      ? events.find(e=>String(e.id)===String(pendingInsightUploadEventId))
+      : null;
+
+    const mapped=rows.map(r=>{
+      const lead=mapExcelLead(r);
+      if(insightEvent){
+        if(!lead.eventId)lead.eventId=insightEvent.id;
+        if(!lead.eventName)lead.eventName=insightEvent.name;
+      }
+      return lead;
+    }).filter(x=>x.company);
+
+    if(!mapped.length)throw new Error('회사명이 있는 데이터가 없습니다.');
+    const scopeText=insightEvent?`\n대상 행사: ${insightEvent.name}`:'';
+    if(!confirm(`${mapped.length}개 업체를 등록/업데이트할까요?${scopeText}`))return;
+
+    setLoading(true,`${mapped.length}개 업체를 구글 시트에 저장하는 중...`);
+    const r=await apiPost({action:'bulkUpsertLeads',leads:mapped});
+    const x=r.result;
+    alert(`업로드 완료\n신규 ${x.created}건 / 업데이트 ${x.updated}건 / 제외 ${x.skipped}건`+(x.errors?.length?'\n\n오류: '+x.errors.slice(0,5).map(e=>`${e.row}행 ${e.message}`).join('\n'):''));
+    const selectedInsight=pendingInsightUploadEventId;
+    await bootstrapData();
+    if(selectedInsight){
+      insightEventSelect.value=selectedInsight;
+      renderInsightSelection();
+    }
+  }catch(e){
+    console.error(e);
+    alert('Excel 업로드 실패: '+e.message);
+  }finally{
+    pendingInsightUploadEventId='';
+    setLoading(false);
+    ev.target.value='';
+  }
+});
 function excelDate(v){if(!v)return'';if(v instanceof Date){const d=new Date(v.getTime()-v.getTimezoneOffset()*60000);return d.toISOString().slice(0,10)}if(typeof v==='number'){const p=XLSX.SSF.parse_date_code(v);if(p)return`${p.y}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`}return String(v).slice(0,10)}
 function mapExcelLead(r){return{eventId:r['행사ID']||r['eventId']||'',eventName:r['행사명']||r['eventName']||'',company:r['회사명']||r['company']||'',country:r['국가']||r['country']||'',companyType:r['업체유형']||r['companyType']||'',contactName:r['담당자명']||r['contactName']||'',email:r['이메일']||r['email']||'',phone:r['연락처']||r['phone']||'',products:r['관심제품']||r['products']||'',grade:r['Lead등급']||r['grade']||'Warm',followUpStatus:r['F/U상태']||r['followUpStatus']||'미접촉',lastAction:r['최근액션']||r['lastAction']||'',nextActionDate:excelDate(r['다음액션일']||r['nextActionDate']),owner:r['내부담당자']||r['owner']||'',memo:r['비고']||r['memo']||''}}
 function downloadLeadTemplate(){const headers=['행사ID','행사명','회사명','국가','업체유형','담당자명','이메일','연락처','관심제품','Lead등급','F/U상태','최근액션','다음액션일','내부담당자','비고'];const sample=[['','MEDICA 2026','ABC Medical','Germany','Distributor','Max Müller','max@example.com','+49-000-0000','MV50, OmniOx','Hot','미접촉','전시회 현장 미팅','2026-11-25','장현호','독일 남부 유통망 보유']];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([headers,...sample]),'F_U_업로드');XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['업체유형','Lead등급','F/U상태'],['Distributor','Hot','미접촉'],['Dealer','Warm','1차 컨택'],['Hospital','Cold','회신 대기'],['Partner','','협의 중'],['Other','','견적·제안'],['','','샘플·데모'],['','','완료'],['','','보류'],['','','종료']]),'코드표');XLSX.writeFile(wb,'Exhibition_FU_Upload_Template.xlsx')}
 function downloadLeadsExcel(){const data=leads.map(l=>({'행사명':l.eventName,'회사명':l.company,'국가':l.country,'업체유형':l.companyType,'담당자명':l.contactName,'이메일':l.email,'연락처':l.phone,'관심제품':l.products,'Lead등급':l.grade,'F/U상태':l.followUpStatus,'최근액션':l.lastAction,'다음액션일':l.nextActionDate,'내부담당자':l.owner,'비고':l.memo}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(data),'Leads');XLSX.writeFile(wb,`Exhibition_Leads_${todayString()}.xlsx`)}
 
+
+function requireInsightEvent(){
+  const id=document.getElementById('insightEventSelect').value;
+  if(!id){alert('분석할 행사를 먼저 선택해 주세요.');return''}
+  return id;
+}
+
+function openInsightDirectLead(){
+  const id=requireInsightEvent();
+  if(!id)return;
+  openDirectLeadModal(id);
+}
+
+function uploadInsightLeads(){
+  const id=requireInsightEvent();
+  if(!id)return;
+  pendingInsightUploadEventId=id;
+  document.getElementById('leadExcelInput').click();
+}
+
+function goInsightLeadPipeline(){
+  const id=requireInsightEvent();
+  if(!id)return;
+  switchView('followupView');
+  document.getElementById('leadEventFilter').value=id;
+  renderLeads();
+}
+
+function renderInsightLeadManager(eventId){
+  const box=document.getElementById('insightLeadManager');
+  const count=document.getElementById('insightLeadCount');
+  if(!eventId){
+    count.textContent='0건';
+    box.innerHTML='<div class="empty">행사를 선택하면 Lead가 표시됩니다.</div>';
+    return;
+  }
+
+  const rows=leads
+    .filter(l=>String(l.eventId)===String(eventId))
+    .sort((a,b)=>(a.nextActionDate||'9999').localeCompare(b.nextActionDate||'9999'));
+
+  count.textContent=`${rows.length}건`;
+
+  if(!rows.length){
+    box.innerHTML='<div class="empty">아직 등록된 Lead가 없습니다. 위 버튼에서 직접 등록하거나 Excel로 일괄 등록할 수 있습니다.</div>';
+    return;
+  }
+
+  box.innerHTML=rows.map(l=>`<div class="insight-lead-row">
+    <div class="company">
+      <strong>${escapeHTML(l.company)}</strong>
+      <span>${escapeHTML([l.country,l.contactName,l.products].filter(Boolean).join(' · ')||'-')}</span>
+    </div>
+    <select id="insGrade_${l.id}">
+      ${leadGrades.map(x=>`<option ${l.grade===x?'selected':''}>${x}</option>`).join('')}
+    </select>
+    <select id="insStatus_${l.id}">
+      ${leadStatuses.map(x=>`<option ${l.followUpStatus===x?'selected':''}>${x}</option>`).join('')}
+    </select>
+    <input type="date" id="insNext_${l.id}" value="${escapeHTML(l.nextActionDate)}">
+    <button class="btn small" type="button" onclick="saveInsightLead('${l.id}')">저장</button>
+  </div>`).join('');
+}
+
+async function saveInsightLead(id){
+  const l=leads.find(x=>String(x.id)===String(id));
+  if(!l)return;
+  const eventId=document.getElementById('insightEventSelect').value;
+  const updated={
+    ...l,
+    grade:document.getElementById('insGrade_'+id).value,
+    followUpStatus:document.getElementById('insStatus_'+id).value,
+    nextActionDate:document.getElementById('insNext_'+id).value
+  };
+  try{
+    setLoading(true,'Lead를 저장하는 중...');
+    await apiPost({action:'updateLead',lead:updated});
+    await bootstrapData();
+    insightEventSelect.value=eventId;
+    renderInsightSelection();
+  }catch(e){
+    console.error(e);
+    alert('Lead 저장 실패: '+e.message);
+  }finally{
+    setLoading(false);
+  }
+}
+
 function renderInsightSelection(){
-  const id=insightEventSelect.value;if(!id){insExpected.textContent='-';insActual.textContent='-';insValid.textContent='0';insHot.textContent='0';insightAutoSummary.innerHTML='<h3>행사를 선택해 주세요.</h3>';insightForm.reset();return}
+  const id=insightEventSelect.value;if(!id){insExpected.textContent='-';insActual.textContent='-';insValid.textContent='0';insHot.textContent='0';insightAutoSummary.innerHTML='<h3>행사를 선택해 주세요.</h3>';renderInsightLeadManager('');insightForm.reset();return}
   const e=events.find(x=>String(x.id)===String(id));const i=insights.find(x=>String(x.eventId)===String(id))||normalizeInsight({eventId:e.id,eventName:e.name});const m=getEventMetrics(id);
   insExpected.textContent=formatCost(e.cost);insActual.textContent=formatCost(i.actualCost);insValid.textContent=m.valid;insHot.textContent=m.hot;
   actualCost.value=i.actualCost||'';costAssessment.value=i.costAssessment||'';visitorQuality.value=i.visitorQuality||'';productFit.value=i.productFit||'';marketPotential.value=i.marketPotential||'';competitorLevel.value=i.competitorLevel||'';reparticipation.value=i.reparticipation||'';mainProducts.value=i.mainProducts||'';marketReaction.value=i.marketReaction||'';competitors.value=i.competitors||'';keyInsight.value=i.keyInsight||'';nextYearImprovement.value=i.nextYearImprovement||'';
-  const cpl=m.valid&&i.actualCost?Math.round(parseCost(i.actualCost)/m.valid):0;insightAutoSummary.innerHTML=`<h3>${escapeHTML(e.name)} · 종합평가 ${insightGrade(i)}</h3><div class="perf-row"><span>확보 업체</span><strong>${m.total}개</strong></div><div class="perf-row"><span>가능성 있는 업체 (Hot+Warm)</span><strong>${m.valid}개</strong></div><div class="perf-row"><span>현재 협의·진행중</span><strong>${m.active}개</strong></div><div class="perf-row"><span>F/U 완료</span><strong>${m.completed}개</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div>`
+  const cpl=m.valid&&i.actualCost?Math.round(parseCost(i.actualCost)/m.valid):0;insightAutoSummary.innerHTML=`<h3>${escapeHTML(e.name)} · 종합평가 ${insightGrade(i)}</h3><div class="perf-row"><span>확보 업체</span><strong>${m.total}개</strong></div><div class="perf-row"><span>가능성 있는 업체 (Hot+Warm)</span><strong>${m.valid}개</strong></div><div class="perf-row"><span>현재 협의·진행중</span><strong>${m.active}개</strong></div><div class="perf-row"><span>F/U 완료</span><strong>${m.completed}개</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div>`;
+  renderInsightLeadManager(id);
 }
 insightEventSelect.addEventListener('change',renderInsightSelection);
 insightForm.addEventListener('submit',async ev=>{ev.preventDefault();const id=insightEventSelect.value;if(!id)return alert('행사를 먼저 선택해 주세요.');const e=events.find(x=>String(x.id)===String(id)),m=getEventMetrics(id);const insight={eventId:e.id,eventName:e.name,actualCost:parseCost(actualCost.value),costAssessment:costAssessment.value,visitorQuality:visitorQuality.value,productFit:productFit.value,marketPotential:marketPotential.value,competitorLevel:competitorLevel.value,reparticipation:reparticipation.value,likelyCompanies:m.valid,mainProducts:mainProducts.value.trim(),marketReaction:marketReaction.value.trim(),competitors:competitors.value.trim(),keyInsight:keyInsight.value.trim(),nextYearImprovement:nextYearImprovement.value.trim()};try{setLoading(true,'Insight 저장 중...');await apiPost({action:'saveInsight',insight});await bootstrapData();insightEventSelect.value=id;renderInsightSelection();alert('Insight가 저장되었습니다.')}catch(err){alert(err.message)}finally{setLoading(false)}});
