@@ -236,9 +236,10 @@
 
   <section id="followupView" class="view">
     <section class="panel glass">
-      <div class="section-head"><div><h2>F/U Pipeline</h2><p>전시회·학회에서 확보한 업체를 Excel로 일괄 등록하고 Follow-up 상태를 관리합니다.</p></div><div id="leadResultCount" class="section-meta">0건</div></div>
+      <div class="section-head"><div><h2>F/U Pipeline</h2><p>전시회·학회에서 확보한 업체를 웹에서 직접 등록하거나 Excel로 일괄 업로드하고 Follow-up 상태를 관리합니다.</p></div><div id="leadResultCount" class="section-meta">0건</div></div>
       <div class="upload-actions">
-        <button class="btn" onclick="document.getElementById('leadExcelInput').click()">Excel 일괄 업로드</button>
+        <button class="btn" onclick="openDirectLeadModal()">+ 업체 직접 등록</button>
+        <button class="btn secondary" onclick="document.getElementById('leadExcelInput').click()">Excel 일괄 업로드</button>
         <button class="btn secondary" onclick="downloadLeadTemplate()">F/U Excel 양식 다운로드</button>
         <button class="btn secondary" onclick="downloadLeadsExcel()">현재 Lead Excel 다운로드</button>
         <input id="leadExcelInput" type="file" accept=".xlsx,.xls" hidden>
@@ -294,6 +295,107 @@
   </section>
 </main>
 
+
+<div id="directLeadModal" class="modal">
+  <div class="modal-content">
+    <button class="modal-close" type="button" onclick="closeDirectLeadModal()">×</button>
+    <div style="margin-bottom:20px">
+      <div class="eyebrow">F/U PIPELINE</div>
+      <h2 style="margin:6px 0 7px;font-size:24px">업체 직접 등록</h2>
+      <p style="margin:0;color:var(--muted);font-size:12px;line-height:1.7">전시회·학회에서 확보한 업체를 1건씩 바로 등록합니다.</p>
+    </div>
+
+    <form id="directLeadForm">
+      <div class="form-grid">
+        <div class="field full">
+          <label>행사 *</label>
+          <select id="directLeadEvent" required>
+            <option value="">행사를 선택하세요</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>회사명 *</label>
+          <input id="directLeadCompany" required placeholder="예: ABC Medical">
+        </div>
+        <div class="field">
+          <label>국가</label>
+          <input id="directLeadCountry" placeholder="예: Germany">
+        </div>
+        <div class="field">
+          <label>업체 유형</label>
+          <select id="directLeadCompanyType">
+            <option value="">선택</option>
+            <option>Distributor</option>
+            <option>Dealer</option>
+            <option>Hospital</option>
+            <option>Partner</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>담당자명</label>
+          <input id="directLeadContactName">
+        </div>
+        <div class="field">
+          <label>이메일</label>
+          <input id="directLeadEmail" type="email" placeholder="name@company.com">
+        </div>
+        <div class="field">
+          <label>연락처</label>
+          <input id="directLeadPhone">
+        </div>
+        <div class="field full">
+          <label>관심 제품</label>
+          <input id="directLeadProducts" placeholder="예: MV50, OmniOx">
+        </div>
+        <div class="field">
+          <label>Lead 등급</label>
+          <select id="directLeadGrade">
+            <option>Hot</option>
+            <option selected>Warm</option>
+            <option>Cold</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>F/U 상태</label>
+          <select id="directLeadStatus">
+            <option selected>미접촉</option>
+            <option>1차 컨택</option>
+            <option>회신 대기</option>
+            <option>협의 중</option>
+            <option>견적·제안</option>
+            <option>샘플·데모</option>
+            <option>완료</option>
+            <option>보류</option>
+            <option>종료</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>최근 액션</label>
+          <input id="directLeadLastAction" placeholder="예: 전시회 현장 미팅">
+        </div>
+        <div class="field">
+          <label>다음 액션일</label>
+          <input id="directLeadNextActionDate" type="date">
+        </div>
+        <div class="field">
+          <label>내부 담당자</label>
+          <input id="directLeadOwner">
+        </div>
+        <div class="field full">
+          <label>비고</label>
+          <textarea id="directLeadMemo" placeholder="요청사항, 논의 내용, 후속 조치 등을 입력하세요."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn secondary" type="button" onclick="closeDirectLeadModal()">취소</button>
+        <button class="btn" type="submit">업체 등록</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div id="detailModal" class="modal"><div class="modal-content"><button class="modal-close" onclick="closeDetail()">×</button><h2 id="detailTitle"></h2><div id="detailBody"></div><div class="modal-actions"><button class="btn secondary" onclick="closeDetail()">닫기</button><button class="btn" onclick="editSelectedEvent()">수정</button></div></div></div>
 <div id="loadingOverlay" class="loading-overlay"><div id="loadingText" class="loading-box">불러오는 중...</div></div>
 
@@ -333,7 +435,7 @@ function renderAll(){populateEventSelects();renderDashboard();renderEvents();ren
 function populateEventSelects(){
   const years=[...new Set(events.map(e=>(e.startDate||'').slice(0,4)).filter(Boolean))].sort();
   const yf=document.getElementById('yearFilter'), old=yf.value; yf.innerHTML='<option value="">전체 연도</option>'+years.map(y=>`<option>${y}</option>`).join('');if(years.includes(old))yf.value=old;
-  ['leadEventFilter','insightEventSelect'].forEach(id=>{const s=document.getElementById(id),oldv=s.value;s.innerHTML=id==='insightEventSelect'?'<option value="">행사를 선택하세요</option>':'<option value="">전체 행사</option>';events.slice().sort((a,b)=>(b.startDate||'').localeCompare(a.startDate||'')).forEach(e=>s.insertAdjacentHTML('beforeend',`<option value="${escapeHTML(e.id)}">${escapeHTML(e.name)}</option>`));if(events.some(e=>String(e.id)===String(oldv)))s.value=oldv})
+  ['leadEventFilter','insightEventSelect','directLeadEvent'].forEach(id=>{const s=document.getElementById(id),oldv=s.value;const isFilter=id==='leadEventFilter';s.innerHTML=isFilter?'<option value="">전체 행사</option>':'<option value="">행사를 선택하세요</option>';events.slice().sort((a,b)=>(b.startDate||'').localeCompare(a.startDate||'')).forEach(e=>s.insertAdjacentHTML('beforeend',`<option value="${escapeHTML(e.id)}">${escapeHTML(e.name)}</option>`));if(events.some(e=>String(e.id)===String(oldv)))s.value=oldv})
 }
 
 function renderDashboard(){
@@ -408,9 +510,77 @@ function getFilteredLeads(){
   return leads.filter(l=>{const h=[l.company,l.country,l.contactName,l.email,l.products,l.owner,l.memo].join(' ').toLowerCase();return(!q||h.includes(q))&&(!ev||String(l.eventId)===String(ev))&&(!g||l.grade===g)&&(!s||l.followUpStatus===s)}).sort((a,b)=>(a.nextActionDate||'9999').localeCompare(b.nextActionDate||'9999'))
 }
 function renderLeads(){
-  const a=getFilteredLeads();leadResultCount.textContent=`${a.length}건`;if(!a.length){leadTableBody.innerHTML='<tr><td colspan="12"><div class="empty">등록된 Lead가 없습니다. Excel 업로드로 한 번에 등록할 수 있습니다.</div></td></tr>';return}
+  const a=getFilteredLeads();leadResultCount.textContent=`${a.length}건`;if(!a.length){leadTableBody.innerHTML='<tr><td colspan="12"><div class="empty">등록된 Lead가 없습니다. 업체 직접 등록 또는 Excel 일괄 업로드를 이용해 주세요.</div></td></tr>';return}
   leadTableBody.innerHTML=a.map(l=>`<tr><td>${escapeHTML(l.eventName)}</td><td><strong>${escapeHTML(l.company)}</strong></td><td>${escapeHTML(l.country)}</td><td>${escapeHTML(l.companyType)}</td><td class="wrap">${escapeHTML(l.products)}</td><td><select class="inline-select" id="grade_${l.id}">${leadGrades.map(x=>`<option ${l.grade===x?'selected':''}>${x}</option>`).join('')}</select></td><td><select class="inline-select" id="status_${l.id}">${leadStatuses.map(x=>`<option ${l.followUpStatus===x?'selected':''}>${x}</option>`).join('')}</select></td><td class="wrap"><input style="min-width:180px;height:34px" id="last_${l.id}" value="${escapeHTML(l.lastAction)}"></td><td><input class="inline-date" type="date" id="next_${l.id}" value="${escapeHTML(l.nextActionDate)}"></td><td>${escapeHTML(l.owner)}</td><td>${escapeHTML(l.email||l.phone||'-')}</td><td><button class="btn small" onclick="saveLeadRow('${l.id}')">저장</button></td></tr>`).join('')
 }
+
+function openDirectLeadModal(){
+  const form=document.getElementById('directLeadForm');
+  form.reset();
+  document.getElementById('directLeadGrade').value='Warm';
+  document.getElementById('directLeadStatus').value='미접촉';
+  const filterEvent=document.getElementById('leadEventFilter').value;
+  if(filterEvent&&events.some(e=>String(e.id)===String(filterEvent))){
+    document.getElementById('directLeadEvent').value=filterEvent;
+  }
+  document.getElementById('directLeadModal').classList.add('show');
+  setTimeout(()=>document.getElementById('directLeadCompany').focus(),50);
+}
+
+function closeDirectLeadModal(){
+  document.getElementById('directLeadModal').classList.remove('show');
+}
+
+document.getElementById('directLeadModal').addEventListener('click',e=>{
+  if(e.target.id==='directLeadModal')closeDirectLeadModal();
+});
+
+document.getElementById('directLeadForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const eventId=document.getElementById('directLeadEvent').value;
+  const event=events.find(x=>String(x.id)===String(eventId));
+  const company=document.getElementById('directLeadCompany').value.trim();
+
+  if(!event){alert('행사를 선택해 주세요.');return}
+  if(!company){alert('회사명을 입력해 주세요.');return}
+
+  const lead={
+    eventId:event.id,
+    eventName:event.name,
+    company,
+    country:document.getElementById('directLeadCountry').value.trim(),
+    companyType:document.getElementById('directLeadCompanyType').value,
+    contactName:document.getElementById('directLeadContactName').value.trim(),
+    email:document.getElementById('directLeadEmail').value.trim(),
+    phone:document.getElementById('directLeadPhone').value.trim(),
+    products:document.getElementById('directLeadProducts').value.trim(),
+    grade:document.getElementById('directLeadGrade').value,
+    followUpStatus:document.getElementById('directLeadStatus').value,
+    lastAction:document.getElementById('directLeadLastAction').value.trim(),
+    nextActionDate:document.getElementById('directLeadNextActionDate').value,
+    owner:document.getElementById('directLeadOwner').value.trim(),
+    memo:document.getElementById('directLeadMemo').value.trim()
+  };
+
+  try{
+    setLoading(true,'업체 정보를 저장하는 중...');
+    const r=await apiPost({action:'bulkUpsertLeads',leads:[lead]});
+    const x=r.result;
+    if(x.skipped){
+      const msg=x.errors?.[0]?.message||'등록할 수 없습니다.';
+      throw new Error(msg);
+    }
+    closeDirectLeadModal();
+    await bootstrapData();
+    alert(x.created?'업체가 등록되었습니다.':'기존 업체 정보가 업데이트되었습니다.');
+  }catch(err){
+    console.error(err);
+    alert('업체 등록 실패: '+err.message);
+  }finally{
+    setLoading(false);
+  }
+});
+
 async function saveLeadRow(id){const l=leads.find(x=>String(x.id)===String(id));if(!l)return;const updated={...l,grade:document.getElementById('grade_'+id).value,followUpStatus:document.getElementById('status_'+id).value,lastAction:document.getElementById('last_'+id).value.trim(),nextActionDate:document.getElementById('next_'+id).value};try{setLoading(true,'F/U 저장 중...');await apiPost({action:'updateLead',lead:updated});await bootstrapData()}catch(e){alert(e.message)}finally{setLoading(false)}}
 
 leadExcelInput.addEventListener('change',async ev=>{const f=ev.target.files[0];if(!f)return;try{setLoading(true,'Excel을 분석하는 중...');const data=await f.arrayBuffer();const wb=XLSX.read(data,{type:'array',cellDates:true});const sh=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(sh,{defval:''});if(!rows.length)throw new Error('업로드할 데이터가 없습니다.');const mapped=rows.map(mapExcelLead).filter(x=>x.company);if(!mapped.length)throw new Error('회사명이 있는 데이터가 없습니다.');if(!confirm(`${mapped.length}개 업체를 등록/업데이트할까요?`))return;setLoading(true,`${mapped.length}개 업체를 구글 시트에 저장하는 중...`);const r=await apiPost({action:'bulkUpsertLeads',leads:mapped});const x=r.result;alert(`업로드 완료\n신규 ${x.created}건 / 업데이트 ${x.updated}건 / 제외 ${x.skipped}건`+(x.errors?.length?'\n\n오류: '+x.errors.slice(0,5).map(e=>`${e.row}행 ${e.message}`).join('\n'):''));await bootstrapData()}catch(e){console.error(e);alert('Excel 업로드 실패: '+e.message)}finally{setLoading(false);ev.target.value=''}});
