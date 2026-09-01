@@ -60,7 +60,16 @@
     .urgent .d-day{background:var(--danger)} .soon .d-day{background:var(--warning)} .kind{color:var(--muted);font-size:10px;font-weight:800}
     .upcoming-card h3{position:relative;z-index:1;margin:20px 0 7px;font-size:19px;line-height:1.35} .upcoming-card p{position:relative;z-index:1;margin:0;color:var(--muted);font-size:12px}
     .upcoming-bottom{position:absolute;z-index:1;left:19px;right:19px;bottom:17px;display:flex;justify-content:space-between;gap:10px;font-size:11px;font-weight:750}
-    .fu-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px} .fu-card{padding:20px;border:1px solid rgba(255,255,255,.95);border-radius:21px;background:rgba(255,255,255,.8);box-shadow:var(--shadow)}
+    .fu-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .budget-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .budget-card{padding:20px;border:1px solid rgba(255,255,255,.95);border-radius:21px;background:rgba(255,255,255,.82);box-shadow:var(--shadow)}
+    .budget-card.total{background:linear-gradient(135deg,#111827,#273449);color:#fff}
+    .budget-card.actual{background:linear-gradient(135deg,var(--primary),var(--violet));color:#fff}
+    .budget-card span{display:block;color:var(--muted);font-size:11px}
+    .budget-card.total span,.budget-card.actual span{color:rgba(255,255,255,.72)}
+    .budget-card strong{display:block;margin-top:7px;font-size:27px;letter-spacing:-.035em}
+    .budget-card small{display:block;margin-top:6px;color:var(--muted);font-size:10px}
+    .budget-card.total small,.budget-card.actual small{color:rgba(255,255,255,.75)} .fu-card{padding:20px;border:1px solid rgba(255,255,255,.95);border-radius:21px;background:rgba(255,255,255,.8);box-shadow:var(--shadow)}
     .fu-card.highlight{grid-column:1/-1;background:linear-gradient(135deg,var(--primary),var(--violet));color:#fff} .fu-card span{color:var(--muted);font-size:11px} .fu-card.highlight span{color:rgba(255,255,255,.72)}
     .fu-card strong{display:block;margin-top:7px;font-size:29px} .fu-card small{display:block;margin-top:6px;color:var(--muted);font-size:10px} .fu-card.highlight small{color:rgba(255,255,255,.78)}
     .performance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
@@ -126,12 +135,44 @@
   <section id="dashboardView" class="view active">
     <section class="hero">
       <div class="hero-grid">
-        <div><div class="eyebrow">EXHIBITION PERFORMANCE & LEAD MANAGEMENT</div><h1>멕아이씨에스<br>전시회·학회 관리</h1><p>전시회·학회의 일정과 비용뿐 아니라 행사에서 확보한 업체, Follow-up 진행상태, 실제 성과와 차년도 인사이트까지 연결해 관리합니다.</p></div>
+        <div><div class="eyebrow">EXHIBITION PERFORMANCE & LEAD MANAGEMENT</div><h1>행사가 끝난 뒤의<br>성과까지 관리합니다.</h1><p>전시회·학회의 일정과 비용뿐 아니라 행사에서 확보한 업체, Follow-up 진행상태, 실제 성과와 차년도 인사이트까지 연결해 관리합니다.</p></div>
         <div class="kpi-grid">
           <div class="kpi"><span>올해 행사</span><strong id="kpiEvents">0</strong><small>전체 등록 행사</small></div>
           <div class="kpi"><span>확보 업체</span><strong id="kpiLeads">0</strong><small>Lead 총합</small></div>
           <div class="kpi"><span>F/U 필요</span><strong id="kpiDue">0</strong><small>오늘/지연 액션</small></div>
           <div class="kpi"><span>Hot Lead</span><strong id="kpiHot">0</strong><small>우선 컨택 대상</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel glass" style="margin-bottom:18px">
+      <div class="section-head">
+        <div>
+          <h2>비용 현황</h2>
+          <p>불참을 제외한 행사 예상비용과 Insight에 입력한 실제비용을 함께 표시합니다.</p>
+        </div>
+        <div id="budgetEventCount" class="section-meta">0건 기준</div>
+      </div>
+      <div class="budget-grid">
+        <div class="budget-card">
+          <span>국내 예상비용</span>
+          <strong id="budgetDomestic">0원</strong>
+          <small id="budgetDomesticSub">0건</small>
+        </div>
+        <div class="budget-card">
+          <span>해외 예상비용</span>
+          <strong id="budgetOverseas">0원</strong>
+          <small id="budgetOverseasSub">0건</small>
+        </div>
+        <div class="budget-card total">
+          <span>총 예상비용</span>
+          <strong id="budgetTotal">0원</strong>
+          <small>국내 + 해외</small>
+        </div>
+        <div class="budget-card actual">
+          <span>등록된 실제비용</span>
+          <strong id="budgetActual">0원</strong>
+          <small id="budgetActualSub">Insight 입력 기준</small>
         </div>
       </div>
     </section>
@@ -302,7 +343,7 @@ function renderDashboard(){
   document.getElementById('kpiEvents').textContent=yearEvents.length;document.getElementById('kpiLeads').textContent=leads.length;document.getElementById('kpiDue').textContent=due;document.getElementById('kpiHot').textContent=hot;
   const active=leads.filter(l=>!['미접촉','완료','보류','종료'].includes(l.followUpStatus)).length;const untouched=leads.filter(l=>l.followUpStatus==='미접촉').length;const complete=leads.filter(l=>l.followUpStatus==='완료').length;
   document.getElementById('fuActive').textContent=active;document.getElementById('fuUntouched').textContent=untouched;document.getElementById('fuComplete').textContent=complete;document.getElementById('fuActiveSub').textContent=`전체 ${leads.length}개 Lead 중`;
-  renderUpcoming();renderPerformance();
+  renderBudget();renderUpcoming();renderPerformance();
 }
 function renderUpcoming(){
   const a=events.filter(e=>{const d=daysUntil(e.startDate);return e.participation!=='불참'&&d!==null&&d>=0&&d<=60}).sort((x,y)=>x.startDate.localeCompare(y.startDate)).slice(0,4);
