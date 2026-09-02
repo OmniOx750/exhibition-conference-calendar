@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exhibition Performance & Lead Management V4.9</title>
+  <title>Exhibition Performance & Lead Management V5.0</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
@@ -72,6 +72,29 @@
     .budget-card.total small,.budget-card.actual small{color:rgba(255,255,255,.75)} .fu-card{padding:20px;border:1px solid rgba(255,255,255,.95);border-radius:21px;background:rgba(255,255,255,.8);box-shadow:var(--shadow)}
     .fu-card.highlight{grid-column:1/-1;background:linear-gradient(135deg,var(--primary),var(--violet));color:#fff} .fu-card span{color:var(--muted);font-size:11px} .fu-card.highlight span{color:rgba(255,255,255,.72)}
     .fu-card strong{display:block;margin-top:7px;font-size:29px} .fu-card small{display:block;margin-top:6px;color:var(--muted);font-size:10px} .fu-card.highlight small{color:rgba(255,255,255,.78)}
+    .roi-panel{margin-bottom:18px}
+    .roi-head-actions{display:flex;align-items:center;gap:8px}
+    .roi-year-select{height:36px;min-width:112px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:11px;font-weight:800;color:#475569}
+    .roi-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+    .roi-kpi{padding:15px 16px;border:1px solid rgba(17,24,39,.06);border-radius:16px;background:#fff}
+    .roi-kpi span{display:block;color:var(--muted);font-size:10px;font-weight:800;margin-bottom:6px}
+    .roi-kpi strong{display:block;font-size:20px;letter-spacing:-.03em}
+    .roi-kpi small{display:block;color:#94a3b8;font-size:9px;margin-top:5px}
+    .roi-kpi.primary{background:linear-gradient(135deg,rgba(37,99,235,.10),rgba(124,58,237,.07));border-color:rgba(37,99,235,.12)}
+    .roi-ranking{display:grid;gap:8px}
+    .roi-rank-row{display:grid;grid-template-columns:minmax(180px,1.5fr) 100px minmax(180px,1fr) 120px;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.8);cursor:pointer}
+    .roi-rank-name{min-width:0}
+    .roi-rank-name strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+    .roi-rank-name small{display:block;color:var(--muted);font-size:9px;margin-top:2px}
+    .roi-rank-value{text-align:right;font-weight:900;font-size:13px}
+    .roi-track{height:8px;border-radius:999px;background:#eef2f7;overflow:hidden}
+    .roi-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#7c3aed)}
+    .roi-positive{color:#059669!important}.roi-negative{color:#dc2626!important}
+    .roi-input-block{margin:14px 0;padding:15px;border:1px solid rgba(37,99,235,.12);border-radius:16px;background:rgba(37,99,235,.035)}
+    .roi-input-block h3{margin:0 0 4px;font-size:13px}.roi-input-block>p{margin:0 0 12px;color:var(--muted);font-size:10px}
+    .roi-mini-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+    .roi-mini{padding:10px;border-radius:12px;background:#f8fafc;border:1px solid var(--line)}
+    .roi-mini span{display:block;color:var(--muted);font-size:9px}.roi-mini strong{display:block;margin-top:4px;font-size:13px}
     .performance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
     .performance-card{padding:20px;border:1px solid rgba(255,255,255,.95);border-radius:22px;background:rgba(255,255,255,.84);box-shadow:var(--shadow);cursor:pointer}
     .performance-card h3{margin:0 0 10px;font-size:17px} .perf-grade{display:inline-flex;min-width:34px;height:34px;align-items:center;justify-content:center;border-radius:11px;background:#eff6ff;color:var(--primary);font-weight:900}
@@ -160,8 +183,8 @@
     .detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:20px} .detail-item{padding:13px;border-radius:13px;background:var(--soft)} .detail-item span{display:block;margin-bottom:5px;color:var(--muted);font-size:10px} .detail-item strong,.detail-item a{color:var(--text);font-size:12px;line-height:1.6;word-break:break-word;white-space:pre-wrap} .detail-item a{color:var(--primary)}
     .modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}
     .loading-overlay{display:none;position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;background:rgba(255,255,255,.74);backdrop-filter:blur(5px)} .loading-overlay.show{display:flex} .loading-box{padding:17px 21px;border-radius:15px;background:#fff;box-shadow:var(--shadow-lg);font-weight:800}
-    @media(max-width:1180px){.hero-grid,.dashboard-grid,.content-grid,.insight-layout{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}.toolbar{grid-template-columns:repeat(3,1fr)}.performance-grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:760px){.app{width:min(100% - 16px,1540px);padding-top:8px}.topbar{position:static;align-items:flex-start;flex-direction:column}.hero{padding:26px 20px;border-radius:25px}.kpi-grid,.upcoming-grid,.fu-summary,.performance-grid,.toolbar,.fu-toolbar,.form-grid,.event-meta,.detail-grid,.score-grid,.rating-grid,.insight-lead-row,.perf-metric-grid{grid-template-columns:1fr}.panel{padding:19px;border-radius:23px}.section-head{align-items:flex-start;flex-direction:column}.section-meta{text-align:left}.event-top{flex-direction:column}.card-actions{width:100%}.card-actions .btn{flex:1}}
+    @media(max-width:1180px){.roi-kpi-grid{grid-template-columns:repeat(2,1fr)}.hero-grid,.dashboard-grid,.content-grid,.insight-layout{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}.toolbar{grid-template-columns:repeat(3,1fr)}.performance-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:760px){.roi-kpi-grid,.roi-mini-grid{grid-template-columns:1fr}.roi-rank-row{grid-template-columns:1fr 76px}.roi-rank-row .roi-track,.roi-rank-row .roi-rank-cost{display:none}.app{width:min(100% - 16px,1540px);padding-top:8px}.topbar{position:static;align-items:flex-start;flex-direction:column}.hero{padding:26px 20px;border-radius:25px}.kpi-grid,.upcoming-grid,.fu-summary,.performance-grid,.toolbar,.fu-toolbar,.form-grid,.event-meta,.detail-grid,.score-grid,.rating-grid,.insight-lead-row,.perf-metric-grid{grid-template-columns:1fr}.panel{padding:19px;border-radius:23px}.section-head{align-items:flex-start;flex-direction:column}.section-meta{text-align:left}.event-top{flex-direction:column}.card-actions{width:100%}.card-actions .btn{flex:1}}
   </style>
 </head>
 <body>
@@ -225,6 +248,20 @@
           <small id="budgetActualSub">Insight 입력 기준</small>
         </div>
       </div>
+    </section>
+
+    <section class="panel glass roi-panel">
+      <div class="section-head">
+        <div><h2>ROI Performance</h2><p>실제 투자비용 대비 전환 매출과 영업 성과를 연도별로 비교합니다.</p></div>
+        <div class="roi-head-actions"><select id="roiYearFilter" class="roi-year-select" onchange="renderROI()"><option value="">전체 연도</option></select></div>
+      </div>
+      <div class="roi-kpi-grid">
+        <div class="roi-kpi"><span>총 투자비용</span><strong id="roiTotalCost">0원</strong><small>Insight 실제비용 합계</small></div>
+        <div class="roi-kpi"><span>전환 매출</span><strong id="roiRevenue">0원</strong><small>행사 기여 매출 합계</small></div>
+        <div class="roi-kpi"><span>순성과</span><strong id="roiNetProfit">0원</strong><small>전환매출 - 투자비용</small></div>
+        <div class="roi-kpi primary"><span>전체 ROI</span><strong id="roiOverall">-</strong><small>(매출-비용) ÷ 비용</small></div>
+      </div>
+      <div id="roiRanking" class="roi-ranking"></div>
     </section>
 
     <section class="dashboard-grid">
@@ -356,6 +393,17 @@
             <div class="field"><label>비용 적정성</label><select id="costAssessment"><option value="">선택</option><option>좋음</option><option>보통</option><option>낮음</option></select></div>
           </div>
           <div class="rating-grid" style="margin-top:12px">
+          <div class="roi-input-block full">
+            <h3>ROI 성과 데이터</h3>
+            <p>총 Lead는 F/U Pipeline에서 자동 집계합니다. 아래 성과값을 입력하면 ROI가 자동 계산됩니다.</p>
+            <div class="form-grid">
+              <div class="field"><label>상담(미팅) 건수</label><input id="meetingCount" type="number" min="0" step="1" placeholder="예: 10"></div>
+              <div class="field"><label>영업기회(SQL) 수</label><input id="sqlCount" type="number" min="0" step="1" placeholder="예: 5"></div>
+              <div class="field"><label>계약 성사 건수</label><input id="contractCount" type="number" min="0" step="1" placeholder="예: 1"></div>
+              <div class="field"><label>전환 매출</label><input id="conversionRevenue" inputmode="numeric" placeholder="예: 15000000"></div>
+            </div>
+            <div id="roiInsightPreview" class="roi-mini-grid"></div>
+          </div>
             <div class="field"><label>방문객/바이어 수준 (1~5)</label><select id="visitorQuality"><option value="">선택</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
             <div class="field"><label>자사 제품 적합도 (1~5)</label><select id="productFit"><option value="">선택</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
             <div class="field"><label>시장성 (1~5)</label><select id="marketPotential"><option value="">선택</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
@@ -523,7 +571,7 @@ async function apiPost(payload){const r=await fetch(GOOGLE_SCRIPT_URL,{method:'P
 
 function normalizeEvent(x){return{id:x.id||createId(),name:x.name||x.title||x.eventName||'',type:x.type||x.eventType||'기타',region:x.region||'',country:x.country||'',city:x.city||'',startDate:String(x.startDate||x.start||'').slice(0,10),endDate:String(x.endDate||x.end||'').slice(0,10),deadline:String(x.deadline||x.applicationDeadline||'').slice(0,10),participation:x.participation||x.attendance||'검토 중',status:x.status||'정보 수집',manager:x.manager||x.owner||'',cost:parseCost(x.cost??x.estimatedCost??x.budget??0),website:x.website||x.url||'',memo:x.memo||x.notes||'',createdAt:x.createdAt||'',updatedAt:x.updatedAt||''}}
 function normalizeLead(x){return{id:x.id||'',eventId:x.eventId||'',eventName:x.eventName||'',company:x.company||'',country:x.country||'',companyType:x.companyType||'',contactName:x.contactName||'',email:x.email||'',phone:x.phone||'',products:x.products||'',grade:x.grade||'Warm',followUpStatus:x.followUpStatus||'미접촉',lastAction:x.lastAction||'',nextActionDate:String(x.nextActionDate||'').slice(0,10),owner:x.owner||'',memo:x.memo||'',createdAt:x.createdAt||'',updatedAt:x.updatedAt||''}}
-function normalizeInsight(x){x=x||{};return{eventId:x.eventId||'',eventName:x.eventName||'',actualCost:parseCost(x.actualCost),costAssessment:x.costAssessment||'',visitorQuality:x.visitorQuality||'',productFit:x.productFit||'',marketPotential:x.marketPotential||'',competitorLevel:x.competitorLevel||'',reparticipation:x.reparticipation||'',likelyCompanies:x.likelyCompanies||'',mainProducts:x.mainProducts||'',marketReaction:x.marketReaction||'',competitors:x.competitors||'',keyInsight:x.keyInsight||'',nextYearImprovement:x.nextYearImprovement||'',updatedAt:x.updatedAt||''}}
+function normalizeInsight(x){x=x||{};return{eventId:x.eventId||'',eventName:x.eventName||'',actualCost:parseCost(x.actualCost),costAssessment:x.costAssessment||'',visitorQuality:x.visitorQuality||'',productFit:x.productFit||'',marketPotential:x.marketPotential||'',competitorLevel:x.competitorLevel||'',reparticipation:x.reparticipation||'',likelyCompanies:x.likelyCompanies||'',mainProducts:x.mainProducts||'',marketReaction:x.marketReaction||'',competitors:x.competitors||'',keyInsight:x.keyInsight||'',nextYearImprovement:x.nextYearImprovement||'',meetingCount:Number(x.meetingCount)||0,sqlCount:Number(x.sqlCount)||0,contractCount:Number(x.contractCount)||0,conversionRevenue:parseCost(x.conversionRevenue),updatedAt:x.updatedAt||''}}
 
 async function bootstrapData(){
   try{setLoading(true,'전시회·F/U·Insight 데이터를 불러오는 중...');const j=await apiGet('bootstrap');events=(j.events||[]).map(normalizeEvent);leads=(j.leads||[]).map(normalizeLead);insights=(j.insights||[]).map(normalizeInsight);document.getElementById('syncStatus').textContent=`구글 시트 연결됨 · ${new Date().toLocaleTimeString('ko-KR')}`;renderAll()}
@@ -539,6 +587,85 @@ function populateEventSelects(){
   const years=[...new Set(events.map(e=>(e.startDate||'').slice(0,4)).filter(Boolean))].sort();
   const yf=document.getElementById('yearFilter'), old=yf.value; yf.innerHTML='<option value="">전체 연도</option>'+years.map(y=>`<option>${y}</option>`).join('');if(years.includes(old))yf.value=old;
   ['leadEventFilter','insightEventSelect','directLeadEvent'].forEach(id=>{const s=document.getElementById(id),oldv=s.value;const isFilter=id==='leadEventFilter';s.innerHTML=isFilter?'<option value="">전체 행사</option>':'<option value="">행사를 선택하세요</option>';events.slice().sort((a,b)=>(b.startDate||'').localeCompare(a.startDate||'')).forEach(e=>s.insertAdjacentHTML('beforeend',`<option value="${escapeHTML(e.id)}">${escapeHTML(e.name)}</option>`));if(events.some(e=>String(e.id)===String(oldv)))s.value=oldv})
+}
+
+
+function roiMetrics(event,insight,metrics){
+  insight=normalizeInsight(insight||{});
+  metrics=metrics||getEventMetrics(event?.id||insight.eventId);
+  const cost=parseCost(insight.actualCost);
+  const leads=Number(metrics.total)||0;
+  const meetings=Number(insight.meetingCount)||0;
+  const sql=Number(insight.sqlCount)||0;
+  const contracts=Number(insight.contractCount)||0;
+  const revenue=parseCost(insight.conversionRevenue);
+  const netProfit=revenue-cost;
+  return{
+    cost,leads,meetings,sql,contracts,revenue,netProfit,
+    roi:cost>0?((revenue-cost)/cost)*100:null,
+    costPerLead:leads>0&&cost>0?cost/leads:null,
+    cpa:contracts>0&&cost>0?cost/contracts:null,
+    conversionRate:meetings>0?(contracts/meetings)*100:null
+  };
+}
+function formatPct(v,digits=1){return Number.isFinite(v)?`${v.toFixed(digits)}%`:'-'}
+function roiClass(v){return Number.isFinite(v)?(v>=0?'roi-positive':'roi-negative'):''}
+
+function populateROIYears(){
+  const s=document.getElementById('roiYearFilter');if(!s)return;
+  const prev=s.value;
+  const years=[...new Set(events.map(eventYear).filter(y=>/^\d{4}$/.test(y)))].sort((a,b)=>b.localeCompare(a));
+  s.innerHTML='<option value="">전체 연도</option>'+years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  if(years.includes(prev))s.value=prev;
+  else if(years.includes(String(new Date().getFullYear())))s.value=String(new Date().getFullYear());
+  else if(years.length)s.value=years[0];
+}
+function renderROI(){
+  const yr=document.getElementById('roiYearFilter')?.value||'';
+  const rows=events.filter(e=>!yr||eventYear(e)===yr).map(e=>{
+    const i=insights.find(x=>String(x.eventId)===String(e.id))||normalizeInsight({});
+    return{e,i,r:roiMetrics(e,i,getEventMetrics(e.id))};
+  }).filter(x=>x.r.cost>0||x.r.revenue>0||x.r.contracts>0||x.r.meetings>0);
+
+  const total=rows.reduce((a,x)=>{a.cost+=x.r.cost;a.revenue+=x.r.revenue;a.net+=x.r.netProfit;return a;},{cost:0,revenue:0,net:0});
+  const overall=total.cost>0?((total.revenue-total.cost)/total.cost)*100:null;
+  roiTotalCost.textContent=formatCost(total.cost);
+  roiRevenue.textContent=formatCost(total.revenue);
+  roiNetProfit.textContent=formatCost(total.net);roiNetProfit.className=roiClass(total.net);
+  roiOverall.textContent=formatPct(overall);roiOverall.className=roiClass(overall);
+
+  const w=document.getElementById('roiRanking');
+  if(!rows.length){w.innerHTML='<div class="empty">해당 연도의 ROI 성과 데이터가 아직 없습니다.</div>';return}
+  const sorted=rows.slice().sort((a,b)=>(b.r.roi??-999999)-(a.r.roi??-999999));
+  const maxAbs=Math.max(1,...sorted.map(x=>Math.abs(Number(x.r.roi)||0)));
+  w.innerHTML=sorted.map((x,idx)=>{
+    const pct=x.r.roi, width=Number.isFinite(pct)?Math.min(100,Math.max(4,Math.abs(pct)/maxAbs*100)):0;
+    return`<div class="roi-rank-row" onclick="openPerformance('${x.e.id}')">
+      <div class="roi-rank-name"><strong>${idx+1}. ${escapeHTML(displayEventName(x.e))}</strong><small>${escapeHTML(eventYear(x.e))} · ${escapeHTML(x.e.region||'-')} · 계약 ${x.r.contracts}건</small></div>
+      <div class="roi-rank-value ${roiClass(pct)}">${formatPct(pct)}</div>
+      <div class="roi-track"><div class="roi-fill" style="width:${width}%"></div></div>
+      <div class="roi-rank-cost"><small style="color:var(--muted)">매출 / 비용</small><strong style="display:block;font-size:10px">${formatCost(x.r.revenue)} / ${formatCost(x.r.cost)}</strong></div>
+    </div>`;
+  }).join('');
+}
+function renderROIInsightPreview(){
+  const id=document.getElementById('insightEventSelect')?.value||'';
+  const e=events.find(x=>String(x.id)===String(id));
+  const w=document.getElementById('roiInsightPreview');if(!w)return;
+  if(!e){w.innerHTML='';return}
+  const temp=normalizeInsight({
+    actualCost:actualCost.value,
+    meetingCount:meetingCount.value,
+    sqlCount:sqlCount.value,
+    contractCount:contractCount.value,
+    conversionRevenue:conversionRevenue.value
+  });
+  const r=roiMetrics(e,temp,getEventMetrics(id));
+  w.innerHTML=`
+    <div class="roi-mini"><span>ROI</span><strong class="${roiClass(r.roi)}">${formatPct(r.roi)}</strong></div>
+    <div class="roi-mini"><span>순성과</span><strong class="${roiClass(r.netProfit)}">${formatCost(r.netProfit)}</strong></div>
+    <div class="roi-mini"><span>Lead당 비용</span><strong>${r.costPerLead?formatCost(Math.round(r.costPerLead)):'-'}</strong></div>
+    <div class="roi-mini"><span>계약당 비용(CPA)</span><strong>${r.cpa?formatCost(Math.round(r.cpa)):'-'}</strong></div>`;
 }
 
 function renderDashboard(){
@@ -581,7 +708,7 @@ function getEventMetrics(eventId){
 function insightGrade(i){if(!i)return '-';const nums=[i.visitorQuality,i.productFit,i.marketPotential].map(Number).filter(n=>n>0);if(!nums.length)return '-';const avg=nums.reduce((a,b)=>a+b,0)/nums.length;return avg>=4?'A':avg>=3?'B':'C'}
 function renderPerformance(){
   const ended=events.filter(e=>e.endDate&&e.endDate<todayString()).sort((a,b)=>b.endDate.localeCompare(a.endDate)).slice(0,6);const w=document.getElementById('performanceGrid');if(!ended.length){w.innerHTML='<div class="empty" style="grid-column:1/-1">종료된 행사 데이터가 없습니다.</div>';return}
-  w.innerHTML=ended.map(e=>{const i=insights.find(x=>String(x.eventId)===String(e.id)),m=getEventMetrics(e.id),actual=i?parseCost(i.actualCost):0,cpl=m.valid&&actual?Math.round(actual/m.valid):0;return`<article class="performance-card" onclick="openInsight('${e.id}')"><div style="display:flex;justify-content:space-between;gap:10px;align-items:start"><div class="year-chip">${escapeHTML(eventYear(e))}</div><h3>${escapeHTML(displayEventName(e))}</h3><span class="perf-grade">${insightScoreGrade(insightScore(i||{}))}</span></div><div class="perf-row"><span>예상 / 실제 비용</span><strong>${formatCost(e.cost)} / ${formatCost(actual)}</strong></div><div class="perf-row"><span>확보 / 유효 업체</span><strong>${m.total} / ${m.valid}</strong></div><div class="perf-row"><span>Hot / 완료</span><strong>${m.hot} / ${m.completed}</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div></article>`}).join('')
+  w.innerHTML=ended.map(e=>{const i=insights.find(x=>String(x.eventId)===String(e.id)),m=getEventMetrics(e.id),actual=i?parseCost(i.actualCost):0,cpl=m.valid&&actual?Math.round(actual/m.valid):0;return`<article class="performance-card" onclick="openInsight('${e.id}')"><div style="display:flex;justify-content:space-between;gap:10px;align-items:start"><div class="year-chip">${escapeHTML(eventYear(e))}</div><h3>${escapeHTML(displayEventName(e))}</h3><span class="perf-grade">${insightScoreGrade(insightScore(i||{}))}</span></div><div class="perf-row"><span>예상 / 실제 비용</span><strong>${formatCost(e.cost)} / ${formatCost(actual)}</strong></div><div class="perf-row"><span>확보 / 유효 업체</span><strong>${m.total} / ${m.valid}</strong></div><div class="perf-row"><span>Hot / 완료</span><strong>${m.hot} / ${m.completed}</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div><div class="perf-row"><span>ROI</span><strong class="${roiClass(roiMetrics(e,i||{},m).roi)}">${formatPct(roiMetrics(e,i||{},m).roi)}</strong></div></article>`}).join('')
 }
 
 function openPerformance(id){
@@ -631,6 +758,22 @@ function openPerformance(id){
       <div class="perf-metric"><span>확보 Lead</span><strong>${m.total}개</strong></div>
       <div class="perf-metric"><span>가능성 업체</span><strong>${m.valid}개</strong></div>
       <div class="perf-metric"><span>F/U 완료</span><strong>${m.completed}개</strong></div>
+    </div>
+
+    <div class="perf-section">
+      <h3>ROI Performance</h3>
+      ${(()=>{const r=roiMetrics(e,i,m);return`
+      <div class="perf-metric-grid">
+        <div class="perf-metric"><span>ROI</span><strong class="${roiClass(r.roi)}">${formatPct(r.roi)}</strong></div>
+        <div class="perf-metric"><span>전환 매출</span><strong>${formatCost(r.revenue)}</strong></div>
+        <div class="perf-metric"><span>순성과</span><strong class="${roiClass(r.netProfit)}">${formatCost(r.netProfit)}</strong></div>
+        <div class="perf-metric"><span>Lead당 비용</span><strong>${r.costPerLead?formatCost(Math.round(r.costPerLead)):'-'}</strong></div>
+        <div class="perf-metric"><span>계약당 비용(CPA)</span><strong>${r.cpa?formatCost(Math.round(r.cpa)):'-'}</strong></div>
+        <div class="perf-metric"><span>상담 건수</span><strong>${r.meetings}건</strong></div>
+        <div class="perf-metric"><span>영업기회(SQL)</span><strong>${r.sql}건</strong></div>
+        <div class="perf-metric"><span>계약 성사</span><strong>${r.contracts}건</strong></div>
+        <div class="perf-metric"><span>리드→계약 전환율</span><strong>${formatPct(r.conversionRate)}</strong></div>
+      </div>`})()}
     </div>
 
     <div class="perf-section">
@@ -770,7 +913,7 @@ document.getElementById('directLeadForm').addEventListener('submit',async e=>{
     }
     closeDirectLeadModal();
     await window.addEventListener('error',e=>{
-  console.error('[V4.9]',e.error||e.message);
+  console.error('[V5.0]',e.error||e.message);
 });
 bootstrapData();
     alert(x.created?'업체가 등록되었습니다.':'기존 업체 정보가 업데이트되었습니다.');
@@ -973,11 +1116,15 @@ function renderInsightSelection(){
   const id=insightEventSelect.value;if(!id){insExpected.textContent='-';insActual.textContent='-';insValid.textContent='0';insHot.textContent='0';insightAutoSummary.innerHTML='<h3>행사를 선택해 주세요.</h3>';renderInsightRatingProfile(normalizeInsight({}));renderInsightLeadManager('');insightForm.reset();return}
   const e=events.find(x=>String(x.id)===String(id));const i=insights.find(x=>String(x.eventId)===String(id))||normalizeInsight({eventId:e.id,eventName:e.name});const m=getEventMetrics(id);
   insExpected.textContent=formatCost(e.cost);insActual.textContent=formatCost(i.actualCost);insValid.textContent=m.valid;insHot.textContent=m.hot;
-  actualCost.value=i.actualCost||'';costAssessment.value=i.costAssessment||'';visitorQuality.value=i.visitorQuality||'';productFit.value=i.productFit||'';marketPotential.value=i.marketPotential||'';competitorLevel.value=i.competitorLevel||'';reparticipation.value=i.reparticipation||'';mainProducts.value=i.mainProducts||'';marketReaction.value=i.marketReaction||'';competitors.value=i.competitors||'';keyInsight.value=i.keyInsight||'';nextYearImprovement.value=i.nextYearImprovement||'';
-  renderInsightRatingProfile(i);const score=insightScore(i);const cpl=m.valid&&i.actualCost?Math.round(parseCost(i.actualCost)/m.valid):0;insightAutoSummary.innerHTML=`<h3>${escapeHTML(e.name)} · 종합평가 ${insightScoreGrade(score)}${score!==null?` · ${score.toFixed(1)}/5`:''}</h3><div class="perf-row"><span>확보 업체</span><strong>${m.total}개</strong></div><div class="perf-row"><span>가능성 있는 업체 (Hot+Warm)</span><strong>${m.valid}개</strong></div><div class="perf-row"><span>현재 협의·진행중</span><strong>${m.active}개</strong></div><div class="perf-row"><span>F/U 완료</span><strong>${m.completed}개</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div>`;
+  actualCost.value=i.actualCost||'';costAssessment.value=i.costAssessment||'';meetingCount.value=i.meetingCount||'';sqlCount.value=i.sqlCount||'';contractCount.value=i.contractCount||'';conversionRevenue.value=i.conversionRevenue||'';visitorQuality.value=i.visitorQuality||'';productFit.value=i.productFit||'';marketPotential.value=i.marketPotential||'';competitorLevel.value=i.competitorLevel||'';reparticipation.value=i.reparticipation||'';mainProducts.value=i.mainProducts||'';marketReaction.value=i.marketReaction||'';competitors.value=i.competitors||'';keyInsight.value=i.keyInsight||'';nextYearImprovement.value=i.nextYearImprovement||'';renderROIInsightPreview();
+  renderInsightRatingProfile(i);const score=insightScore(i);const cpl=m.valid&&i.actualCost?Math.round(parseCost(i.actualCost)/m.valid):0;insightAutoSummary.innerHTML=`<h3>${escapeHTML(e.name)} · 종합평가 ${insightScoreGrade(score)}${score!==null?` · ${score.toFixed(1)}/5`:''}</h3><div class="perf-row"><span>확보 업체</span><strong>${m.total}개</strong></div><div class="perf-row"><span>가능성 있는 업체 (Hot+Warm)</span><strong>${m.valid}개</strong></div><div class="perf-row"><span>현재 협의·진행중</span><strong>${m.active}개</strong></div><div class="perf-row"><span>F/U 완료</span><strong>${m.completed}개</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div>${(()=>{const r=roiMetrics(e,i,m);return`<div class="perf-row"><span>ROI</span><strong class="${roiClass(r.roi)}">${formatPct(r.roi)}</strong></div><div class="perf-row"><span>전환 매출</span><strong>${formatCost(r.revenue)}</strong></div><div class="perf-row"><span>계약 성사</span><strong>${r.contracts}건</strong></div>`})()}`;
   renderInsightLeadManager(id);
 }
 insightEventSelect.addEventListener('change',renderInsightSelection);
+['actualCost','meetingCount','sqlCount','contractCount','conversionRevenue'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el){el.addEventListener('input',renderROIInsightPreview);el.addEventListener('change',renderROIInsightPreview);}
+});
 ['visitorQuality','productFit','marketPotential'].forEach(id=>{
   document.getElementById(id).addEventListener('change',()=>{
     renderInsightRatingProfile(normalizeInsight({
@@ -988,7 +1135,7 @@ insightEventSelect.addEventListener('change',renderInsightSelection);
   });
 });
 
-insightForm.addEventListener('submit',async ev=>{ev.preventDefault();const id=insightEventSelect.value;if(!id)return alert('행사를 먼저 선택해 주세요.');const e=events.find(x=>String(x.id)===String(id)),m=getEventMetrics(id);const insight={eventId:e.id,eventName:e.name,actualCost:parseCost(actualCost.value),costAssessment:costAssessment.value,visitorQuality:visitorQuality.value,productFit:productFit.value,marketPotential:marketPotential.value,competitorLevel:competitorLevel.value,reparticipation:reparticipation.value,likelyCompanies:m.valid,mainProducts:mainProducts.value.trim(),marketReaction:marketReaction.value.trim(),competitors:competitors.value.trim(),keyInsight:keyInsight.value.trim(),nextYearImprovement:nextYearImprovement.value.trim()};try{setLoading(true,'Insight 저장 중...');await apiPost({action:'saveInsight',insight});await bootstrapData();insightEventSelect.value=id;renderInsightSelection();alert('Insight가 저장되었습니다.')}catch(err){alert(err.message)}finally{setLoading(false)}});
+insightForm.addEventListener('submit',async ev=>{ev.preventDefault();const id=insightEventSelect.value;if(!id)return alert('행사를 먼저 선택해 주세요.');const e=events.find(x=>String(x.id)===String(id)),m=getEventMetrics(id);const insight={eventId:e.id,eventName:e.name,actualCost:parseCost(actualCost.value),costAssessment:costAssessment.value,meetingCount:Number(meetingCount.value)||0,sqlCount:Number(sqlCount.value)||0,contractCount:Number(contractCount.value)||0,conversionRevenue:parseCost(conversionRevenue.value),visitorQuality:visitorQuality.value,productFit:productFit.value,marketPotential:marketPotential.value,competitorLevel:competitorLevel.value,reparticipation:reparticipation.value,likelyCompanies:m.valid,mainProducts:mainProducts.value.trim(),marketReaction:marketReaction.value.trim(),competitors:competitors.value.trim(),keyInsight:keyInsight.value.trim(),nextYearImprovement:nextYearImprovement.value.trim()};try{setLoading(true,'Insight 저장 중...');await apiPost({action:'saveInsight',insight});await bootstrapData();insightEventSelect.value=id;renderInsightSelection();alert('Insight가 저장되었습니다.')}catch(err){alert(err.message)}finally{setLoading(false)}});
 
 ['searchInput','yearFilter','regionFilter','typeFilter','participationFilter','sortFilter'].forEach(id=>{document.getElementById(id).addEventListener('input',renderEvents);document.getElementById(id).addEventListener('change',renderEvents)});
 ['leadSearch','leadEventFilter','leadGradeFilter','leadStatusFilter'].forEach(id=>{document.getElementById(id).addEventListener('input',renderLeads);document.getElementById(id).addEventListener('change',renderLeads)});
