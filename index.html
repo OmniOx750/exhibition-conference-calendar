@@ -525,7 +525,7 @@ function getEventMetrics(eventId){
 function insightGrade(i){if(!i)return '-';const nums=[i.visitorQuality,i.productFit,i.marketPotential].map(Number).filter(n=>n>0);if(!nums.length)return '-';const avg=nums.reduce((a,b)=>a+b,0)/nums.length;return avg>=4?'A':avg>=3?'B':'C'}
 function renderPerformance(){
   const ended=events.filter(e=>e.endDate&&e.endDate<todayString()).sort((a,b)=>b.endDate.localeCompare(a.endDate)).slice(0,6);const w=document.getElementById('performanceGrid');if(!ended.length){w.innerHTML='<div class="empty" style="grid-column:1/-1">종료된 행사 데이터가 없습니다.</div>';return}
-  w.innerHTML=ended.map(e=>{const i=insights.find(x=>String(x.eventId)===String(e.id)),m=getEventMetrics(e.id),actual=i?parseCost(i.actualCost):0,cpl=m.valid&&actual?Math.round(actual/m.valid):0;return`<article class="performance-card" onclick="openInsight('${e.id}')"><div style="display:flex;justify-content:space-between;gap:10px;align-items:start"><h3>${escapeHTML(e.name)}</h3><span class="perf-grade">${insightScoreGrade(insightScore(i))}</span></div><div class="perf-row"><span>예상 / 실제 비용</span><strong>${formatCost(e.cost)} / ${formatCost(actual)}</strong></div><div class="perf-row"><span>확보 / 유효 업체</span><strong>${m.total} / ${m.valid}</strong></div><div class="perf-row"><span>Hot / 완료</span><strong>${m.hot} / ${m.completed}</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div></article>`}).join('')
+  w.innerHTML=ended.map(e=>{const i=insights.find(x=>String(x.eventId)===String(e.id)),m=getEventMetrics(e.id),actual=i?parseCost(i.actualCost):0,cpl=m.valid&&actual?Math.round(actual/m.valid):0;return`<article class="performance-card" onclick="openInsight('${e.id}')"><div style="display:flex;justify-content:space-between;gap:10px;align-items:start"><h3>${escapeHTML(e.name)}</h3><span class="perf-grade">${insightScoreGrade(insightScore(i||{}))}</span></div><div class="perf-row"><span>예상 / 실제 비용</span><strong>${formatCost(e.cost)} / ${formatCost(actual)}</strong></div><div class="perf-row"><span>확보 / 유효 업체</span><strong>${m.total} / ${m.valid}</strong></div><div class="perf-row"><span>Hot / 완료</span><strong>${m.hot} / ${m.completed}</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div></article>`}).join('')
 }
 function openInsight(id){switchView('insightView');document.getElementById('insightEventSelect').value=id;renderInsightSelection()}
 
@@ -772,6 +772,7 @@ async function saveInsightLead(id){
 
 
 function insightScore(insight){
+  insight=insight||{};
   const vals=[Number(insight.visitorQuality),Number(insight.productFit),Number(insight.marketPotential)].filter(v=>Number.isFinite(v)&&v>0);
   if(vals.length<3)return null;
   return Math.round((vals.reduce((a,b)=>a+b,0)/3)*10)/10;
@@ -783,6 +784,7 @@ function insightScoreGrade(score){
   return'C';
 }
 function insightScoreComment(insight){
+  insight=insight||{};
   const v=Number(insight.visitorQuality)||0;
   const p=Number(insight.productFit)||0;
   const m=Number(insight.marketPotential)||0;
@@ -798,6 +800,7 @@ function insightScoreComment(insight){
   return`전반적인 평가지표가 낮은 편입니다. 바이어 구성, 제품 적합성, 시장성 중 낮은 항목의 원인을 우선 점검하는 것이 좋습니다.`;
 }
 function renderInsightRatingProfile(insight){
+  insight=insight||{};
   const score=insightScore(insight);
   const v=Number(insight.visitorQuality)||0;
   const p=Number(insight.productFit)||0;
