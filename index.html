@@ -113,6 +113,18 @@
     .insight-lead-row select,.insight-lead-row input{height:32px;padding:0 7px;font-size:10px;border-radius:9px}
  .score-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
     .score-card{padding:15px;border-radius:17px;background:var(--soft);border:1px solid var(--line)} .score-card span{display:block;color:var(--muted);font-size:10px} .score-card strong{display:block;margin-top:5px;font-size:22px}
+    .rating-profile{margin:0 0 14px;padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.66)}
+    .rating-profile-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .rating-profile-head h3{margin:0;font-size:13px}
+    .rating-total{font-size:26px;font-weight:900;letter-spacing:-.04em}
+    .rating-total small{font-size:11px;color:var(--muted);font-weight:700}
+    .rating-row{display:grid;grid-template-columns:130px 1fr 28px;gap:10px;align-items:center;margin:10px 0}
+    .rating-row span{font-size:10px;color:var(--muted);font-weight:750}
+    .rating-track{height:10px;border-radius:999px;background:#e9eef5;overflow:hidden}
+    .rating-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--primary),var(--violet));width:0}
+    .rating-value{text-align:right;font-size:11px;font-weight:900}
+    .rating-comment{margin-top:12px;padding:11px 12px;border-radius:12px;background:var(--soft);font-size:11px;line-height:1.6;color:var(--text)}
+
     .rating-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px} .insight-summary{padding:20px;border-radius:22px;background:linear-gradient(135deg,#111827,#273449);color:#fff}
     .insight-summary h3{margin:0 0 14px;font-size:20px} .insight-summary .perf-row{border-color:rgba(255,255,255,.12)} .insight-summary .perf-row span{color:rgba(255,255,255,.62)}
     .modal{display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.48);backdrop-filter:blur(6px)} .modal.show{display:flex}
@@ -282,7 +294,17 @@
             <div class="score-card"><span>유효 업체</span><strong id="insValid">0</strong></div>
             <div class="score-card"><span>Hot Lead</span><strong id="insHot">0</strong></div>
           </div>
-          <div id="insightAutoSummary" class="insight-summary"><h3>행사를 선택해 주세요.</h3></div>
+          <div class="rating-profile">
+              <div class="rating-profile-head">
+                <h3>평가 프로필</h3>
+                <div class="rating-total"><span id="insRatingTotal">-</span> <small>/ 5</small></div>
+              </div>
+              <div class="rating-row"><span>방문객·바이어 수준</span><div class="rating-track"><div id="barVisitor" class="rating-fill"></div></div><div id="valVisitor" class="rating-value">-</div></div>
+              <div class="rating-row"><span>자사 제품 적합도</span><div class="rating-track"><div id="barProduct" class="rating-fill"></div></div><div id="valProduct" class="rating-value">-</div></div>
+              <div class="rating-row"><span>시장성</span><div class="rating-track"><div id="barMarket" class="rating-fill"></div></div><div id="valMarket" class="rating-value">-</div></div>
+              <div id="insRatingComment" class="rating-comment">평가 점수를 입력하면 자동 해석이 표시됩니다.</div>
+            </div>
+            <div id="insightAutoSummary" class="insight-summary"><h3>행사를 선택해 주세요.</h3></div>
           <div class="insight-leads">
             <div class="insight-leads-head">
               <h3>행사 Lead 빠른 관리</h3>
@@ -503,7 +525,7 @@ function getEventMetrics(eventId){
 function insightGrade(i){if(!i)return '-';const nums=[i.visitorQuality,i.productFit,i.marketPotential].map(Number).filter(n=>n>0);if(!nums.length)return '-';const avg=nums.reduce((a,b)=>a+b,0)/nums.length;return avg>=4?'A':avg>=3?'B':'C'}
 function renderPerformance(){
   const ended=events.filter(e=>e.endDate&&e.endDate<todayString()).sort((a,b)=>b.endDate.localeCompare(a.endDate)).slice(0,6);const w=document.getElementById('performanceGrid');if(!ended.length){w.innerHTML='<div class="empty" style="grid-column:1/-1">종료된 행사 데이터가 없습니다.</div>';return}
-  w.innerHTML=ended.map(e=>{const i=insights.find(x=>String(x.eventId)===String(e.id)),m=getEventMetrics(e.id),actual=i?parseCost(i.actualCost):0,cpl=m.valid&&actual?Math.round(actual/m.valid):0;return`<article class="performance-card" onclick="openInsight('${e.id}')"><div style="display:flex;justify-content:space-between;gap:10px;align-items:start"><h3>${escapeHTML(e.name)}</h3><span class="perf-grade">${insightGrade(i)}</span></div><div class="perf-row"><span>예상 / 실제 비용</span><strong>${formatCost(e.cost)} / ${formatCost(actual)}</strong></div><div class="perf-row"><span>확보 / 유효 업체</span><strong>${m.total} / ${m.valid}</strong></div><div class="perf-row"><span>Hot / 완료</span><strong>${m.hot} / ${m.completed}</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div></article>`}).join('')
+  w.innerHTML=ended.map(e=>{const i=insights.find(x=>String(x.eventId)===String(e.id)),m=getEventMetrics(e.id),actual=i?parseCost(i.actualCost):0,cpl=m.valid&&actual?Math.round(actual/m.valid):0;return`<article class="performance-card" onclick="openInsight('${e.id}')"><div style="display:flex;justify-content:space-between;gap:10px;align-items:start"><h3>${escapeHTML(e.name)}</h3><span class="perf-grade">${insightScoreGrade(insightScore(i))}</span></div><div class="perf-row"><span>예상 / 실제 비용</span><strong>${formatCost(e.cost)} / ${formatCost(actual)}</strong></div><div class="perf-row"><span>확보 / 유효 업체</span><strong>${m.total} / ${m.valid}</strong></div><div class="perf-row"><span>Hot / 완료</span><strong>${m.hot} / ${m.completed}</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div></article>`}).join('')
 }
 function openInsight(id){switchView('insightView');document.getElementById('insightEventSelect').value=id;renderInsightSelection()}
 
@@ -748,15 +770,67 @@ async function saveInsightLead(id){
   }
 }
 
+
+function insightScore(insight){
+  const vals=[Number(insight.visitorQuality),Number(insight.productFit),Number(insight.marketPotential)].filter(v=>Number.isFinite(v)&&v>0);
+  if(vals.length<3)return null;
+  return Math.round((vals.reduce((a,b)=>a+b,0)/3)*10)/10;
+}
+function insightScoreGrade(score){
+  if(score===null)return'-';
+  if(score>=4)return'A';
+  if(score>=3)return'B';
+  return'C';
+}
+function insightScoreComment(insight){
+  const v=Number(insight.visitorQuality)||0;
+  const p=Number(insight.productFit)||0;
+  const m=Number(insight.marketPotential)||0;
+  if(!v||!p||!m)return'평가 점수를 입력하면 자동 해석이 표시됩니다.';
+  const avg=(v+p+m)/3;
+  const items=[{name:'바이어 수준',value:v},{name:'제품 적합도',value:p},{name:'시장성',value:m}].sort((a,b)=>b.value-a.value);
+  if(avg>=4.3)return`${items[0].name}가 특히 강하고 전반적인 행사 적합도가 매우 높은 편입니다. 차년도 재참가 우선순위를 높게 검토할 만합니다.`;
+  if(avg>=4.0)return`전반적으로 우수한 행사입니다. 특히 ${items[0].name}가 강점이며, 확보 Lead의 후속 전환 성과를 함께 확인하는 것이 좋습니다.`;
+  if(avg>=3.0){
+    if(Math.max(v,p,m)-Math.min(v,p,m)>=2)return`${items[0].name}는 좋지만 ${items[2].name}는 상대적으로 약합니다. 재참가 판단 시 강점과 약점을 분리해서 보는 것이 좋습니다.`;
+    return`전반적으로 평균 이상입니다. 실제 Lead 전환과 비용 효율을 함께 보고 재참가 여부를 판단하는 것이 적절합니다.`;
+  }
+  return`전반적인 평가지표가 낮은 편입니다. 바이어 구성, 제품 적합성, 시장성 중 낮은 항목의 원인을 우선 점검하는 것이 좋습니다.`;
+}
+function renderInsightRatingProfile(insight){
+  const score=insightScore(insight);
+  const v=Number(insight.visitorQuality)||0;
+  const p=Number(insight.productFit)||0;
+  const m=Number(insight.marketPotential)||0;
+  document.getElementById('insRatingTotal').textContent=score===null?'-':score.toFixed(1);
+  document.getElementById('valVisitor').textContent=v||'-';
+  document.getElementById('valProduct').textContent=p||'-';
+  document.getElementById('valMarket').textContent=m||'-';
+  document.getElementById('barVisitor').style.width=v?`${Math.min(v,5)*20}%`:'0%';
+  document.getElementById('barProduct').style.width=p?`${Math.min(p,5)*20}%`:'0%';
+  document.getElementById('barMarket').style.width=m?`${Math.min(m,5)*20}%`:'0%';
+  document.getElementById('insRatingComment').textContent=insightScoreComment(insight);
+}
+
 function renderInsightSelection(){
-  const id=insightEventSelect.value;if(!id){insExpected.textContent='-';insActual.textContent='-';insValid.textContent='0';insHot.textContent='0';insightAutoSummary.innerHTML='<h3>행사를 선택해 주세요.</h3>';renderInsightLeadManager('');insightForm.reset();return}
+  const id=insightEventSelect.value;if(!id){insExpected.textContent='-';insActual.textContent='-';insValid.textContent='0';insHot.textContent='0';insightAutoSummary.innerHTML='<h3>행사를 선택해 주세요.</h3>';renderInsightRatingProfile(normalizeInsight({}));renderInsightLeadManager('');insightForm.reset();return}
   const e=events.find(x=>String(x.id)===String(id));const i=insights.find(x=>String(x.eventId)===String(id))||normalizeInsight({eventId:e.id,eventName:e.name});const m=getEventMetrics(id);
   insExpected.textContent=formatCost(e.cost);insActual.textContent=formatCost(i.actualCost);insValid.textContent=m.valid;insHot.textContent=m.hot;
   actualCost.value=i.actualCost||'';costAssessment.value=i.costAssessment||'';visitorQuality.value=i.visitorQuality||'';productFit.value=i.productFit||'';marketPotential.value=i.marketPotential||'';competitorLevel.value=i.competitorLevel||'';reparticipation.value=i.reparticipation||'';mainProducts.value=i.mainProducts||'';marketReaction.value=i.marketReaction||'';competitors.value=i.competitors||'';keyInsight.value=i.keyInsight||'';nextYearImprovement.value=i.nextYearImprovement||'';
-  const cpl=m.valid&&i.actualCost?Math.round(parseCost(i.actualCost)/m.valid):0;insightAutoSummary.innerHTML=`<h3>${escapeHTML(e.name)} · 종합평가 ${insightGrade(i)}</h3><div class="perf-row"><span>확보 업체</span><strong>${m.total}개</strong></div><div class="perf-row"><span>가능성 있는 업체 (Hot+Warm)</span><strong>${m.valid}개</strong></div><div class="perf-row"><span>현재 협의·진행중</span><strong>${m.active}개</strong></div><div class="perf-row"><span>F/U 완료</span><strong>${m.completed}개</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div>`;
+  renderInsightRatingProfile(i);const score=insightScore(i);const cpl=m.valid&&i.actualCost?Math.round(parseCost(i.actualCost)/m.valid):0;insightAutoSummary.innerHTML=`<h3>${escapeHTML(e.name)} · 종합평가 ${insightScoreGrade(score)}${score!==null?` · ${score.toFixed(1)}/5`:''}</h3><div class="perf-row"><span>확보 업체</span><strong>${m.total}개</strong></div><div class="perf-row"><span>가능성 있는 업체 (Hot+Warm)</span><strong>${m.valid}개</strong></div><div class="perf-row"><span>현재 협의·진행중</span><strong>${m.active}개</strong></div><div class="perf-row"><span>F/U 완료</span><strong>${m.completed}개</strong></div><div class="perf-row"><span>유효 Lead당 비용</span><strong>${cpl?formatCost(cpl):'-'}</strong></div>`;
   renderInsightLeadManager(id);
 }
 insightEventSelect.addEventListener('change',renderInsightSelection);
+['visitorQuality','productFit','marketPotential'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',()=>{
+    renderInsightRatingProfile(normalizeInsight({
+      visitorQuality:visitorQuality.value,
+      productFit:productFit.value,
+      marketPotential:marketPotential.value
+    }));
+  });
+});
+
 insightForm.addEventListener('submit',async ev=>{ev.preventDefault();const id=insightEventSelect.value;if(!id)return alert('행사를 먼저 선택해 주세요.');const e=events.find(x=>String(x.id)===String(id)),m=getEventMetrics(id);const insight={eventId:e.id,eventName:e.name,actualCost:parseCost(actualCost.value),costAssessment:costAssessment.value,visitorQuality:visitorQuality.value,productFit:productFit.value,marketPotential:marketPotential.value,competitorLevel:competitorLevel.value,reparticipation:reparticipation.value,likelyCompanies:m.valid,mainProducts:mainProducts.value.trim(),marketReaction:marketReaction.value.trim(),competitors:competitors.value.trim(),keyInsight:keyInsight.value.trim(),nextYearImprovement:nextYearImprovement.value.trim()};try{setLoading(true,'Insight 저장 중...');await apiPost({action:'saveInsight',insight});await bootstrapData();insightEventSelect.value=id;renderInsightSelection();alert('Insight가 저장되었습니다.')}catch(err){alert(err.message)}finally{setLoading(false)}});
 
 ['searchInput','yearFilter','regionFilter','typeFilter','participationFilter','sortFilter'].forEach(id=>{document.getElementById(id).addEventListener('input',renderEvents);document.getElementById(id).addEventListener('change',renderEvents)});
