@@ -1,0 +1,13 @@
+/* Rendering performance tweaks: preserve glass look while reducing GPU work */
+@media (min-width:761px){
+  .glass,.panel{backdrop-filter:blur(24px) saturate(1.16)!important;-webkit-backdrop-filter:blur(24px) saturate(1.16)!important}
+  .topbar{backdrop-filter:blur(26px) saturate(1.18)!important;-webkit-backdrop-filter:blur(26px) saturate(1.18)!important}
+  .hero{backdrop-filter:blur(26px) saturate(1.18)!important;-webkit-backdrop-filter:blur(26px) saturate(1.18)!important}
+  .kpi,.budget-card,.fu-card,.roi-kpi,.performance-card,.upcoming-card,.score-card,.rating-profile,.insight-leads,.roi-input-block,.perf-metric,.timeline-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .btn.secondary,.mek-collapse-toggle{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .table-wrap{backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important}
+  .modal-content{backdrop-filter:blur(26px) saturate(1.14)!important;-webkit-backdrop-filter:blur(26px) saturate(1.14)!important}
+}
+.event-card,.performance-card,.upcoming-card,.timeline-item{content-visibility:auto;contain-intrinsic-size:180px}
+.view:not(.active){content-visibility:hidden}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
