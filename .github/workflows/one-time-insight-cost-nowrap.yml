@@ -1,0 +1,49 @@
+name: One-time Insight cost display patch
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-time-insight-cost-nowrap.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Keep Insight cost values on one line
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+          old = "    .score-card{padding:15px;border-radius:17px;background:var(--soft);border:1px solid var(--line)} .score-card span{display:block;color:var(--muted);font-size:10px} .score-card strong{display:block;margin-top:5px;font-size:22px}\n"
+          new = "    .score-card{padding:15px 12px;border-radius:17px;background:var(--soft);border:1px solid var(--line)} .score-card span{display:block;color:var(--muted);font-size:10px} .score-card strong{display:block;margin-top:5px;font-size:22px}\n    #insExpected,#insActual{font-size:clamp(15px,1vw,17px);letter-spacing:-.04em;white-space:nowrap}\n"
+
+          if new in text:
+              print('Patch already applied.')
+          elif old in text:
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+              print('Patch applied.')
+          else:
+              raise SystemExit('Target CSS block not found; no file changes made.')
+          PY
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No commit needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Keep Insight cost values on one line'
+          git push origin HEAD:main
