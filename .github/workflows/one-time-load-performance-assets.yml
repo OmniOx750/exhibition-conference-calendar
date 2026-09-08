@@ -1,0 +1,52 @@
+name: One-time exhibition performance loader
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-time-load-performance-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Link performance assets
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          theme='  <link rel="stylesheet" href="mekics-glass-theme.css" />\n'
+          perf_css='  <link rel="stylesheet" href="performance-tweaks.css?v=20260908" />\n'
+          if 'performance-tweaks.css' not in s and theme in s:
+              s=s.replace(theme,theme+perf_css,1)
+          collapse='  <script src="dashboard-collapse.js?v=20260908"></script>\n'
+          perf_js='  <script src="performance-boost.js?v=20260908"></script>\n'
+          if 'performance-boost.js' not in s and collapse in s:
+              s=s.replace(collapse,collapse+perf_js,1)
+          marker='  <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n'
+          pre='  <link rel="preconnect" href="https://script.google.com" crossorigin>\n  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>\n'
+          if 'rel="preconnect" href="https://script.google.com"' not in s and marker in s:
+              s=s.replace(marker,marker+pre,1)
+          x='<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>'
+          xd='<script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>'
+          if x in s:s=s.replace(x,xd,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit patch and remove workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/one-time-load-performance-assets.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html .github/workflows/one-time-load-performance-assets.yml
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Load exhibition performance optimizations'
+          git push origin HEAD:main
