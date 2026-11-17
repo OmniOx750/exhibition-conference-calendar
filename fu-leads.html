@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEKICS · 전시회 Lead F/U 관리</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f8f6fb;--surface:rgba(255,255,255,.55);--surface-strong:rgba(255,255,255,.82);
+  --border:rgba(255,255,255,.7);--line:rgba(69,79,112,.10);--text:#192238;--muted:#778197;
+  --blue:#3973f6;--violet:#8069e8;--pink:#ef9fbe;--green:#16a37a;--amber:#e0900b;--red:#e5484d;--gray:#8a93a6;
+  --shadow:0 18px 48px rgba(54,49,85,.07),inset 0 1px 0 rgba(255,255,255,.5);
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif;color:var(--text);font-size:13px;
+  background:
+    radial-gradient(ellipse 60% 52% at -4% -7%,rgba(255,185,214,.78),transparent 66%),
+    radial-gradient(ellipse 58% 48% at 103% 3%,rgba(211,198,255,.72),transparent 65%),
+    radial-gradient(ellipse 55% 44% at 53% 17%,rgba(196,229,255,.48),transparent 68%),
+    radial-gradient(ellipse 48% 40% at 90% 77%,rgba(232,211,255,.34),transparent 70%),
+    linear-gradient(150deg,#fff9fc 0%,#f8f4ff 44%,#f1f8fc 100%);
+  background-attachment:fixed;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{max-width:1480px;margin:0 auto;padding:22px 22px 60px}
+.glass{background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);backdrop-filter:blur(30px) saturate(1.25);-webkit-backdrop-filter:blur(30px) saturate(1.25);border-radius:22px}
+/* top */
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 16px;position:sticky;top:12px;z-index:20}
+.brand{display:flex;align-items:center;gap:11px;margin-right:auto}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#3973f6,#8069e8 60%,#db91b7);box-shadow:0 11px 28px rgba(77,91,180,.2);display:grid;place-items:center;color:#fff;font-weight:900;font-size:13px}
+.brand strong{display:block;font-size:15px;letter-spacing:-.02em}.brand span{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+.tabs{display:flex;gap:4px;padding:4px;border-radius:15px;background:rgba(255,255,255,.32);border:1px solid rgba(255,255,255,.6)}
+.tab{border:0;background:transparent;padding:9px 15px;border-radius:12px;font-weight:800;color:#69758d;white-space:nowrap}
+.tab.active{background:rgba(255,255,255,.8);color:var(--blue);box-shadow:0 7px 18px rgba(54,49,85,.07)}
+.btn{min-height:38px;padding:0 14px;border:0;border-radius:13px;font-weight:800;background:linear-gradient(135deg,rgba(57,115,246,.95),rgba(109,110,230,.95));color:#fff;box-shadow:0 9px 22px rgba(57,115,246,.16);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.btn.secondary{background:rgba(255,255,255,.7);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.ghost{background:transparent;color:var(--muted);box-shadow:none}
+.btn.danger{background:#fff1f2;color:var(--red);box-shadow:none}
+.btn.small{min-height:30px;padding:0 10px;font-size:11px;border-radius:10px}
+.btn:hover{filter:brightness(1.04);transform:translateY(-1px)}
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr 2fr;gap:18px;margin-top:18px}
+.hero-main{padding:26px 28px}
+.eyebrow{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(57,115,246,.09);color:var(--blue);font-size:11px;font-weight:850;letter-spacing:.04em}
+.hero h1{margin:14px 0 0;font-size:clamp(28px,3.4vw,44px);line-height:1.05;letter-spacing:-.05em}
+.hero p{margin:12px 0 0;color:var(--muted);line-height:1.65;font-size:13px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kpi{padding:16px 18px;position:relative;overflow:hidden;cursor:pointer;transition:.18s}
+.kpi:hover{transform:translateY(-2px)}
+.kpi span{color:var(--muted);font-size:11px;font-weight:700}
+.kpi strong{display:block;margin-top:6px;font-size:28px;letter-spacing:-.04em}
+.kpi small{display:block;margin-top:3px;color:var(--muted);font-size:10.5px}
+.kpi::after{content:"";position:absolute;right:-18px;top:-18px;width:70px;height:70px;border-radius:50%;background:var(--c,var(--blue));opacity:.12}
+/* section */
+.section{margin-top:18px;padding:20px 22px}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.section-head h2{margin:0;font-size:20px;letter-spacing:-.035em}
+.section-head p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.filters input,.filters select{height:36px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.72);padding:0 11px;outline:none}
+.filters input{min-width:220px;flex:1}
+.filters input:focus,.filters select:focus{border-color:rgba(57,115,246,.4);box-shadow:0 0 0 3px rgba(57,115,246,.1)}
+/* table */
+.table-wrap{overflow:auto;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.5)}
+table{width:100%;border-collapse:collapse;min-width:1180px}
+th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{position:sticky;top:0;background:rgba(248,247,253,.96);font-size:11px;color:var(--muted);font-weight:800;white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:var(--blue)}
+tbody tr{cursor:pointer;transition:.12s}
+tbody tr:hover{background:rgba(57,115,246,.045)}
+td .sub{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+td.org strong{font-size:13.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap;background:rgba(120,130,150,.1);color:#5b6478}
+.chip i{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+.st-지연{background:rgba(229,72,77,.11);color:var(--red)}
+.st-임박{background:rgba(224,144,11,.13);color:#b86e00}
+.st-예정{background:rgba(57,115,246,.1);color:var(--blue)}
+.st-일정미정{background:rgba(120,130,150,.1);color:#6a7387}
+.st-종료{background:rgba(22,163,122,.1);color:var(--green)}
+.lv-상{color:var(--red);font-weight:900}.lv-중{color:var(--amber);font-weight:900}.lv-하{color:var(--gray);font-weight:900}
+.stage{background:rgba(128,105,232,.1);color:var(--violet)}
+.stage.won{background:rgba(22,163,122,.12);color:var(--green)}
+.stage.lost{background:rgba(229,72,77,.1);color:var(--red)}
+.stage.hold{background:rgba(120,130,150,.12);color:#5b6478}
+.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+.empty h3{margin:0 0 6px;color:var(--text);font-size:17px}
+.empty .btn{margin-top:14px}
+/* kanban */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,1fr);gap:12px;overflow-x:auto;padding-bottom:6px}
+.col{background:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.65);border-radius:18px;padding:12px;min-height:220px;transition:.15s}
+.col.drop{background:rgba(57,115,246,.08);border-color:rgba(57,115,246,.35)}
+.col-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:850}
+.col-head small{color:var(--muted);font-weight:700}
+.col-sum{font-size:10.5px;color:var(--muted);margin:-6px 0 10px}
+.card{background:var(--surface-strong);border:1px solid rgba(255,255,255,.9);border-radius:14px;padding:11px 12px;margin-bottom:9px;box-shadow:0 6px 16px rgba(54,49,85,.06);cursor:grab}
+.card:active{cursor:grabbing}
+.card strong{display:block;font-size:13px}
+.card .meta{color:var(--muted);font-size:11px;margin-top:3px;line-height:1.45}
+.card .row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:6px}
+/* schedule */
+.sched{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sched-col{background:rgba(255,255,255,.42);border-radius:18px;padding:14px;border:1px solid rgba(255,255,255,.65)}
+.sched-col h3{margin:0 0 10px;font-size:14px;display:flex;justify-content:space-between}
+.sched-item{background:var(--surface-strong);border-radius:13px;padding:10px 12px;margin-bottom:8px;cursor:pointer;border-left:3px solid var(--c,var(--blue))}
+.sched-item .d{font-size:11px;font-weight:850;color:var(--c,var(--blue))}
+.sched-item strong{display:block;margin-top:2px}
+.sched-item .meta{font-size:11px;color:var(--muted);margin-top:2px}
+/* analytics */
+.ana{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.ana-card{background:rgba(255,255,255,.45);border-radius:18px;padding:16px;border:1px solid rgba(255,255,255,.65)}
+.ana-card h3{margin:0 0 12px;font-size:14px}
+.bar{display:grid;grid-template-columns:110px 1fr 44px;gap:8px;align-items:center;margin-bottom:8px;font-size:12px}
+.bar .track{height:10px;border-radius:99px;background:rgba(120,130,150,.12);overflow:hidden}
+.bar .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#3973f6,#8069e8)}
+.bar b{text-align:right;font-size:12px}
+.bar .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(25,34,56,.28);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;z-index:50;padding:40px 16px;overflow:auto}
+.overlay.open{display:flex}
+.modal{width:min(980px,100%);background:rgba(255,255,255,.93);border-radius:24px;box-shadow:0 30px 80px rgba(25,34,56,.22);padding:24px 26px}
+.modal.sm{width:min(480px,100%)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.modal-head h2{margin:0;font-size:20px;letter-spacing:-.03em}
+.grp{margin-top:18px}
+.grp h4{margin:0 0 10px;font-size:11px;color:var(--blue);letter-spacing:.06em;font-weight:850}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 12px}
+.f{display:flex;flex-direction:column;gap:5px}
+.f.span2{grid-column:span 2}.f.span4{grid-column:span 4}
+.f label{font-size:11px;color:var(--muted);font-weight:750}
+.f input,.f select,.f textarea{border:1px solid var(--line);border-radius:11px;background:#fff;padding:9px 11px;outline:none;min-height:38px}
+.f textarea{resize:vertical;min-height:62px}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:rgba(57,115,246,.45);box-shadow:0 0 0 3px rgba(57,115,246,.1)}
+.modal-foot{display:flex;justify-content:space-between;gap:8px;margin-top:22px;flex-wrap:wrap}
+.modal-foot div{display:flex;gap:8px}
+.history{margin-top:8px;border-left:2px solid rgba(128,105,232,.25);padding-left:14px}
+.h-item{position:relative;margin-bottom:12px}
+.h-item::before{content:"";position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--violet);box-shadow:0 0 0 3px #fff}
+.h-item .d{font-size:11px;color:var(--muted);font-weight:800}
+.h-item p{margin:2px 0 0}
+.h-add{display:grid;grid-template-columns:140px 130px 1fr auto;gap:8px;margin-top:6px}
+.h-add input,.h-add select{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;min-height:36px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#192238;color:#fff;padding:11px 18px;border-radius:13px;font-weight:700;opacity:0;transition:.25s;z-index:80;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
+.hidden{display:none!important}
+@media (max-width:1100px){.hero{grid-template-columns:1fr}.sched,.ana{grid-template-columns:1fr 1fr}}
+@media (max-width:720px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr 1fr}.f.span4{grid-column:span 2}.sched,.ana{grid-template-columns:1fr}.topbar{flex-wrap:wrap}.tabs{order:3;width:100%;overflow-x:auto}.h-add{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar glass">
+    <div class="brand"><div class="brand-mark">MEK</div><div><strong>Lead F/U Manager</strong><span>전시회·학회 리드 후속관리</span></div></div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-view="list">리드 리스트</button>
+      <button class="tab" data-view="board">파이프라인</button>
+      <button class="tab" data-view="sched">F/U 일정</button>
+      <button class="tab" data-view="ana">분석</button>
+    </nav>
+    <button class="btn" onclick="openLead()">＋ 리드 등록</button>
+  </header>
+
+  <section class="hero">
+    <div class="glass hero-main">
+      <div class="eyebrow">EXHIBITION LEAD FOLLOW-UP</div>
+      <h1>전시회에서 만난 고객,<br>끝까지 따라갑니다.</h1>
+      <p>접수 → 연락 → 데모 → 견적 → 수주까지 리드별 진행 단계와 다음 F/U 일정을 한눈에 관리합니다. F/U 상태(지연·임박·예정)는 오늘 날짜 기준으로 자동 계산됩니다.</p>
+      <div class="hero-actions">
+        <button class="btn secondary" onclick="document.getElementById('fileIn').click()">⬆ 엑셀 불러오기</button>
+        <button class="btn secondary" onclick="exportXlsx()">⬇ 엑셀 내보내기</button>
+        <input type="file" id="fileIn" accept=".xlsx,.xls" class="hidden">
+      </div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <!-- LIST -->
+  <section class="glass section view" id="view-list">
+    <div class="section-head"><div><h2>리드 리스트</h2><p>행을 클릭하면 상세 정보와 F/U 이력을 볼 수 있습니다. 열 제목을 누르면 정렬됩니다.</p></div><div id="count" class="chip">0건</div></div>
+    <div class="filters">
+      <input id="q" placeholder="🔍  병원·기관명, 고객명, 문의 내용, 담당 영업 검색">
+      <select id="fExpo"><option value="">전체 전시회</option></select>
+      <select id="fStage"><option value="">전체 단계</option></select>
+      <select id="fStatus"><option value="">전체 F/U 상태</option><option>지연</option><option>임박</option><option>예정</option><option>일정 미정</option><option>종료</option></select>
+      <select id="fOwner"><option value="">전체 담당</option></select>
+      <select id="fLevel"><option value="">전체 관심도</option><option>상</option><option>중</option><option>하</option></select>
+      <button class="btn ghost small" onclick="resetFilters()">초기화</button>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th data-k="no">No</th><th data-k="org">병원·기관 / 고객</th><th data-k="expo">전시회 · 접수일</th><th data-k="product">관심 제품</th><th data-k="interest">관심도</th>
+        <th data-k="owner">담당</th><th data-k="stage">진행 단계</th><th data-k="lastFu">최근 F/U</th><th data-k="nextFu">다음 F/U</th><th data-k="status">F/U 상태</th><th data-k="amount">예상 금액</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="emptyList" class="empty hidden"><h3>아직 등록된 리드가 없습니다</h3><div>기존 「전시회 F/U 관리」 엑셀을 불러오거나, 새 리드를 직접 등록하세요.</div>
+      <button class="btn" onclick="document.getElementById('fileIn').click()">⬆ 엑셀 불러오기</button> <button class="btn secondary" onclick="openLead()">＋ 리드 등록</button></div>
+    </div>
+  </section>
+
+  <!-- BOARD -->
+  <section class="glass section view hidden" id="view-board">
+    <div class="section-head"><div><h2>파이프라인</h2><p>카드를 끌어다 놓으면 진행 단계가 바뀝니다.</p></div></div>
+    <div class="board" id="board"></div>
+  </section>
+
+  <!-- SCHEDULE -->
+  <section class="glass section view hidden" id="view-sched">
+    <div class="section-head"><div><h2>F/U 일정</h2><p>다음 F/U 예정일 기준으로 놓친 건과 이번 주 할 일을 정리합니다.</p></div></div>
+    <div class="sched" id="sched"></div>
+  </section>
+
+  <!-- ANALYTICS -->
+  <section class="glass section view hidden" id="view-ana">
+    <div class="section-head"><div><h2>분석</h2><p>전시회별 리드 성과와 제품·담당자별 분포입니다.</p></div></div>
+    <div class="ana" id="ana"></div>
+  </section>
+
+  <p class="note">※ 데이터는 이 브라우저에만 저장됩니다(서버 전송 없음). 다른 PC와 공유하려면 「엑셀 내보내기」로 파일을 주고받으세요.</p>
+</div>
+
+<!-- LEAD MODAL -->
+<div class="overlay" id="leadOv">
+  <div class="modal">
+    <div class="modal-head"><h2 id="mTitle">리드 등록</h2><button class="btn ghost" onclick="closeOv('leadOv')">✕</button></div>
+    <form id="leadForm" autocomplete="off">
+      <div class="grp"><h4>전시회 접수</h4><div class="grid">
+        <div class="f span2"><label>전시회</label><input name="expo" list="dlExpo" required></div>
+        <div class="f"><label>접수일</label><input type="date" name="date"></div>
+        <div class="f"><label>No</label><input name="no" type="number" readonly style="background:#f6f7fb"></div>
+      </div></div>
+      <div class="grp"><h4>고객 정보</h4><div class="grid">
+        <div class="f span2"><label>병원·기관명 *</label><input name="org" required></div>
+        <div class="f"><label>지역</label><input name="region" list="dlRegion"></div>
+        <div class="f"><label>진료과</label><input name="dept" list="dlDept"></div>
+        <div class="f"><label>고객명</label><input name="name"></div>
+        <div class="f"><label>직책</label><input name="title"></div>
+        <div class="f"><label>연락처</label><input name="phone"></div>
+        <div class="f"><label>이메일</label><input name="email" type="email"></div>
+      </div></div>
+      <div class="grp"><h4>관심 내용</h4><div class="grid">
+        <div class="f"><label>관심 제품</label><input name="product" list="dlProduct"></div>
+        <div class="f"><label>관심도</label><select name="interest"><option value="">-</option><option>상</option><option>중</option><option>하</option></select></div>
+        <div class="f span2"><label>문의 내용</label><input name="inquiry"></div>
+      </div></div>
+      <div class="grp"><h4>FOLLOW-UP 현황</h4><div class="grid">
+        <div class="f"><label>담당 영업</label><input name="owner" list="dlOwner"></div>
+        <div class="f"><label>진행 단계</label><select name="stage" id="stageSel"></select></div>
+        <div class="f"><label>최근 F/U일</label><input type="date" name="lastFu"></div>
+        <div class="f"><label>다음 F/U 예정일</label><input type="date" name="nextFu"></div>
+        <div class="f span2"><label>최근 F/U 결과</label><input name="lastResult"></div>
+        <div class="f span2"><label>다음 액션</label><input name="nextAction"></div>
+      </div></div>
+      <div class="grp"><h4>결과</h4><div class="grid">
+        <div class="f"><label>예상 금액 (원)</label><input name="amount" inputmode="numeric" placeholder="예: 35,000,000"></div>
+        <div class="f"><label>수주일</label><input type="date" name="wonDate"></div>
+        <div class="f span2"><label>실패·보류 사유</label><input name="lostReason"></div>
+      </div></div>
+      <div class="grp" id="histGrp"><h4>F/U 이력</h4>
+        <div class="h-add">
+          <input type="date" id="hDate"><select id="hMethod"></select><input id="hResult" placeholder="F/U 내용·결과 (입력 시 '최근 F/U'에 자동 반영)"><button type="button" class="btn small" onclick="addHistory()">기록 추가</button>
+        </div>
+        <div class="history" id="history"></div>
+      </div>
+      <div class="modal-foot">
+        <div><button type="button" class="btn danger" id="delBtn" onclick="deleteLead()">삭제</button></div>
+        <div><button type="button" class="btn secondary" onclick="closeOv('leadOv')">취소</button><button class="btn" type="submit">저장</button></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="overlay" id="impOv">
+  <div class="modal sm">
+    <div class="modal-head"><h2>엑셀 불러오기</h2><button class="btn ghost" onclick="closeOv('impOv')">✕</button></div>
+    <p id="impMsg" style="color:var(--muted);line-height:1.6"></p>
+    <div class="modal-foot"><div></div><div>
+      <button class="btn secondary" onclick="applyImport('merge')">기존 데이터에 합치기</button>
+      <button class="btn" onclick="applyImport('replace')">전체 교체</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="overlay" id="cfOv">
+  <div class="modal sm">
+    <div class="modal-head"><h2>삭제할까요?</h2></div>
+    <p style="color:var(--muted)" id="cfMsg"></p>
+    <div class="modal-foot"><div></div><div><button class="btn secondary" onclick="closeOv('cfOv')">취소</button><button class="btn danger" id="cfYes">삭제</button></div></div>
+  </div>
+</div>
+
+<datalist id="dlExpo"></datalist><datalist id="dlOwner"></datalist><datalist id="dlProduct"></datalist><datalist id="dlRegion"></datalist><datalist id="dlDept"></datalist>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- constants (엑셀 「목록값」 시트 기준) ---------- */
+const STAGES=['신규','연락 완료','대기','미팅·데모','견적 제출','협상','수주','보류','실패'];
+const CLOSED=['수주','보류','실패'];
+const METHODS=['전화','이메일','방문','문자·메신저','온라인 미팅'];
+const PRODUCTS=['OmniOx','OMNIOX750','MV2000','MV50','MTV1000','Patient Monitor','Circuit','기타'];
+const COLS=['no','expo','date','org','region','dept','name','title','phone','email','product','interest','inquiry','owner','stage','lastFu','lastResult','nextAction','nextFu','status','amount','wonDate','lostReason','updated'];
+const HEAD2=['No','전시회','접수일','병원·기관명','지역','진료과','고객명','직책','연락처','이메일','관심 제품','관심도','문의 내용','담당 영업','진행 단계','최근 F/U일','최근 F/U 결과','다음 액션','다음 F/U 예정일','F/U 상태','예상 금액 (원)','수주일','실패·보류 사유','최종 업데이트'];
+const KEY='mekics_fu_leads_v1';
+
+/* ---------- state ---------- */
+let leads=load(), editId=null, pendingImport=null, sortK='no', sortDir=1, statusFocus='';
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return []}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(leads))}catch(e){toast('브라우저 저장에 실패했습니다')}render()}
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>ymd(new Date());
+const dayDiff=s=>{if(!s)return null;const a=new Date(s+'T00:00:00'),b=new Date(today()+'T00:00:00');return Math.round((a-b)/864e5)};
+const md=s=>s?s.slice(5).replace('-','/'):'';
+const won=n=>n?Number(n).toLocaleString('ko-KR'):'';
+const eok=n=>{n=Number(n)||0;if(n>=1e8)return (n/1e8).toFixed(n%1e8?1:0)+'억';if(n>=1e4)return Math.round(n/1e4).toLocaleString()+'만';return n.toLocaleString()};
+const normStage=s=>{s=String(s||'').trim();if(!s)return '신규';const k=s.replace(/\s/g,'');return STAGES.find(x=>x.replace(/\s/g,'')===k)||s};
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+function fuStatus(l){ // 엑셀 수식과 동일 로직
+  if(!l.org)return '';
+  if(CLOSED.includes(l.stage))return '종료';
+  if(!l.nextFu)return '일정 미정';
+  const d=dayDiff(l.nextFu);
+  if(d<0)return '지연'; if(d<=3)return '임박'; return '예정';
+}
+const stChip=s=>s?`<span class="chip st-${s.replace(/\s/g,'')}"><i></i>${s}</span>`:'';
+const stageChip=s=>`<span class="chip stage ${s==='수주'?'won':s==='실패'?'lost':s==='보류'?'hold':''}">${esc(s)}</span>`;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200)}
+function closeOv(id){$('#'+id).classList.remove('open')}
+const uniq=(k)=>[...new Set(leads.map(l=>l[k]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'ko'));
+
+/* ---------- render ---------- */
+function render(){
+  leads.forEach(l=>l.status=fuStatus(l));
+  renderKpis(); fillFilters(); renderList(); renderBoard(); renderSched(); renderAna();
+}
+function renderKpis(){
+  const open=leads.filter(l=>!CLOSED.includes(l.stage));
+  const late=leads.filter(l=>l.status==='지연').length, soon=leads.filter(l=>l.status==='임박').length;
+  const wonL=leads.filter(l=>l.stage==='수주');
+  const pipe=open.reduce((a,l)=>a+(+l.amount||0),0), wonAmt=wonL.reduce((a,l)=>a+(+l.amount||0),0);
+  const hot=open.filter(l=>l.interest==='상').length;
+  const k=[
+    ['총 리드',leads.length,`${uniq('expo').length}개 행사`,'var(--blue)',''],
+    ['진행 중',open.length,`관심도 상 ${hot}건`,'var(--violet)',''],
+    ['F/U 지연',late,'예정일이 지난 건','var(--red)','지연'],
+    ['3일 내 임박',soon,'이번에 연락할 건','var(--amber)','임박'],
+    ['파이프라인 금액',eok(pipe),'진행 중 예상 금액','var(--pink)',''],
+    ['수주',wonL.length,wonAmt?eok(wonAmt)+'원':'—','var(--green)','종료'],
+  ];
+  $('#kpis').innerHTML=k.map(([a,b,c,col,f])=>`<div class="glass kpi" style="--c:${col}" onclick="kpiFilter('${f}')"><span>${a}</span><strong>${b}</strong><small>${c}</small></div>`).join('');
+}
+function kpiFilter(f){switchView('list');$('#fStatus').value=f;renderList();}
+function fillFilters(){
+  const set=(id,arr,first)=>{const el=$(id),v=el.value;el.innerHTML=`<option value="">${first}</option>`+arr.map(x=>`<option>${esc(x)}</option>`).join('');el.value=arr.includes(v)?v:''};
+  set('#fExpo',uniq('expo'),'전체 전시회');
+  set('#fStage',[...new Set([...STAGES,...uniq('stage')])],'전체 단계');
+  set('#fOwner',uniq('owner'),'전체 담당');
+  const dl=(id,arr)=>$(id).innerHTML=arr.map(x=>`<option value="${esc(x)}">`).join('');
+  dl('#dlExpo',uniq('expo'));dl('#dlOwner',uniq('owner'));dl('#dlProduct',[...new Set([...PRODUCTS,...uniq('product')])]);dl('#dlRegion',uniq('region'));dl('#dlDept',uniq('dept'));
+}
+function filtered(){
+  const q=$('#q').value.trim().toLowerCase(),e=$('#fExpo').value,s=$('#fStage').value,st=$('#fStatus').value,o=$('#fOwner').value,lv=$('#fLevel').value;
+  return leads.filter(l=>(!e||l.expo===e)&&(!s||l.stage===s)&&(!st||l.status===st)&&(!o||l.owner===o)&&(!lv||l.interest===lv)&&
+    (!q||[l.org,l.name,l.inquiry,l.owner,l.product,l.dept,l.lastResult,l.nextAction].join(' ').toLowerCase().includes(q)));
+}
+const STORD={'지연':0,'임박':1,'예정':2,'일정 미정':3,'종료':4};
+function renderList(){
+  const rows=filtered().sort((a,b)=>{
+    let x=a[sortK],y=b[sortK];
+    if(sortK==='status'){x=STORD[x]??9;y=STORD[y]??9}
+    if(sortK==='amount'||sortK==='no'){x=+x||0;y=+y||0}
+    if(sortK==='stage'){x=STAGES.indexOf(x);y=STAGES.indexOf(y)}
+    if(sortK==='interest'){x='상중하'.indexOf(x||'z');y='상중하'.indexOf(y||'z')}
+    x=x??'';y=y??'';return (x>y?1:x<y?-1:0)*sortDir;
+  });
+  $('#count').textContent=rows.length+'건';
+  $('#tbody').innerHTML=rows.map(l=>{
+    const d=dayDiff(l.nextFu);const dtxt=l.nextFu?`${md(l.nextFu)}<span class="sub">${l.status==='종료'?'':d<0?`D+${-d}`:d===0?'오늘':`D-${d}`}</span>`:'<span class="sub">—</span>';
+    return `<tr onclick="openLead('${l.id}')">
+    <td>${esc(l.no)}</td>
+    <td class="org"><strong>${esc(l.org)}</strong><span class="sub">${esc([l.name&&l.name+' '+(l.title||''),l.dept,l.region].filter(Boolean).join(' · '))}</span></td>
+    <td>${esc(l.expo)}<span class="sub">${esc(l.date||'')}</span></td>
+    <td>${esc(l.product)}<span class="sub">${esc(l.inquiry||'')}</span></td>
+    <td class="lv-${esc(l.interest)}">${esc(l.interest||'-')}</td>
+    <td>${esc(l.owner||'-')}</td>
+    <td>${stageChip(l.stage)}</td>
+    <td>${md(l.lastFu)}<span class="sub">${esc(l.lastResult||'')}</span></td>
+    <td>${dtxt}</td>
+    <td>${stChip(l.status)}</td>
+    <td style="text-align:right">${won(l.amount)}</td></tr>`}).join('');
+  $('#emptyList').classList.toggle('hidden',leads.length>0);
+  document.querySelectorAll('th[data-k]').forEach(th=>{th.textContent=th.textContent.replace(/ [▲▼]$/,'');if(th.dataset.k===sortK)th.textContent+=sortDir>0?' ▲':' ▼'});
+}
+function renderBoard(){
+  const stages=[...new Set([...STAGES,...uniq('stage')])];
+  $('#board').innerHTML=stages.map(s=>{
+    const items=leads.filter(l=>l.stage===s);const sum=items.reduce((a,l)=>a+(+l.amount||0),0);
+    return `<div class="col" data-stage="${esc(s)}" ondragover="event.preventDefault();this.classList.add('drop')" ondragleave="this.classList.remove('drop')" ondrop="dropCard(event,this)">
+      <div class="col-head">${stageChip(s)}<small>${items.length}건</small></div>${sum?`<div class="col-sum">${eok(sum)}원</div>`:''}
+      ${items.map(l=>`<div class="card" draggable="true" ondragstart="event.dataTransfer.setData('id','${l.id}')" onclick="openLead('${l.id}')">
+        <strong>${esc(l.org)}</strong><div class="meta">${esc([l.name,l.product].filter(Boolean).join(' · '))}<br>${esc(l.nextAction||l.inquiry||'')}</div>
+        <div class="row"><span class="lv-${esc(l.interest)}" style="font-size:11px">${l.interest?'관심 '+esc(l.interest):''}</span>${stChip(l.status)}</div></div>`).join('')}
+    </div>`}).join('');
+}
+function dropCard(ev,col){
+  ev.preventDefault();col.classList.remove('drop');
+  const l=leads.find(x=>x.id===ev.dataTransfer.getData('id'));if(!l)return;
+  const s=col.dataset.stage;if(l.stage===s)return;
+  l.stage=s;l.updated=today();if(s==='수주'&&!l.wonDate)l.wonDate=today();
+  save();toast(`${l.org} → ${s}`);
+}
+function renderSched(){
+  const open=leads.filter(l=>!CLOSED.includes(l.stage));
+  const g={late:[],week:[],later:[],none:[]};
+  open.forEach(l=>{const d=dayDiff(l.nextFu);if(d===null)g.none.push(l);else if(d<0)g.late.push(l);else if(d<=7)g.week.push(l);else g.later.push(l)});
+  Object.values(g).forEach(a=>a.sort((x,y)=>(x.nextFu||'').localeCompare(y.nextFu||'')));
+  const col=(t,arr,c)=>`<div class="sched-col"><h3>${t}<span class="chip">${arr.length}</span></h3>${arr.map(l=>{const d=dayDiff(l.nextFu);
+    return `<div class="sched-item" style="--c:${c}" onclick="openLead('${l.id}')"><div class="d">${l.nextFu?md(l.nextFu)+' · '+(d<0?`${-d}일 지남`:d===0?'오늘':`D-${d}`):'예정일 미정'}</div>
+    <strong>${esc(l.org)}</strong><div class="meta">${esc(l.nextAction||'다음 액션 미입력')} · ${esc(l.owner||'담당 미정')}</div></div>`}).join('')||'<div class="meta" style="color:var(--muted)">없음</div>'}</div>`;
+  $('#sched').innerHTML=col('🔴 지연',g.late,'var(--red)')+col('🟠 7일 이내',g.week,'var(--amber)')+col('🔵 이후 예정',g.later,'var(--blue)')+col('⚪ 일정 미정',g.none,'var(--gray)');
+}
+function renderAna(){
+  const bars=(arr)=>{const m=Math.max(1,...arr.map(x=>x[1]));return arr.map(([k,v,t])=>`<div class="bar"><span class="lbl" title="${esc(k)}">${esc(k)}</span><div class="track"><div class="fill" style="width:${v/m*100}%"></div></div><b>${t??v}</b></div>`).join('')||'<div style="color:var(--muted)">데이터 없음</div>'};
+  const count=k=>Object.entries(leads.reduce((a,l)=>{const v=l[k]||'미입력';a[v]=(a[v]||0)+1;return a},{})).sort((a,b)=>b[1]-a[1]);
+  const byExpo=uniq('expo').map(e=>{const ls=leads.filter(l=>l.expo===e);const w=ls.filter(l=>l.stage==='수주').length;return [e,ls.length,`${ls.length}건`]}).sort((a,b)=>b[1]-a[1]);
+  const funnel=['신규','연락 완료','대기','미팅·데모','견적 제출','협상','수주'].map((s,i,arr)=>{const n=leads.filter(l=>{const idx=arr.indexOf(l.stage);return idx>=i}).length;return [s,n]});
+  const amt=Object.entries(leads.filter(l=>!CLOSED.includes(l.stage)).reduce((a,l)=>{const v=l.owner||'미배정';a[v]=(a[v]||0)+(+l.amount||0);return a},{})).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[k,v,eok(v)]);
+  $('#ana').innerHTML=`
+   <div class="ana-card"><h3>전시회별 리드</h3>${bars(byExpo)}</div>
+   <div class="ana-card"><h3>단계 퍼널 (해당 단계 이상 도달)</h3>${bars(funnel)}</div>
+   <div class="ana-card"><h3>관심 제품</h3>${bars(count('product'))}</div>
+   <div class="ana-card"><h3>담당 영업별 리드</h3>${bars(count('owner'))}</div>
+   <div class="ana-card"><h3>관심도</h3>${bars(count('interest'))}</div>
+   <div class="ana-card"><h3>담당별 진행 중 예상 금액</h3>${amt.some(x=>x[1])?bars(amt):'<div style="color:var(--muted)">예상 금액을 입력하면 표시됩니다</div>'}</div>`;
+}
+
+/* ---------- view switching / filters ---------- */
+function switchView(v){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===v));document.querySelectorAll('.view').forEach(s=>s.classList.toggle('hidden',s.id!=='view-'+v))}
+$('#tabs').onclick=e=>{const b=e.target.closest('.tab');if(b)switchView(b.dataset.view)};
+['#q','#fExpo','#fStage','#fStatus','#fOwner','#fLevel'].forEach(id=>$(id).addEventListener('input',renderList));
+function resetFilters(){['#q','#fExpo','#fStage','#fStatus','#fOwner','#fLevel'].forEach(id=>$(id).value='');renderList()}
+document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{const k=th.dataset.k;sortDir=sortK===k?-sortDir:1;sortK=k;renderList()});
+
+/* ---------- modal ---------- */
+$('#stageSel').innerHTML=STAGES.map(s=>`<option>${s}</option>`).join('');
+$('#hMethod').innerHTML=METHODS.map(s=>`<option>${s}</option>`).join('');
+let draftHistory=[];
+function openLead(id){
+  editId=id||null;const f=$('#leadForm');f.reset();
+  const l=id?leads.find(x=>x.id===id):{no:nextNo(),date:today(),stage:'신규',expo:$('#fExpo').value||''};
+  if(id&&!l)return;
+  if(l.stage&&!STAGES.includes(l.stage)&&!$('#stageSel').querySelector(`option[value="${CSS.escape(l.stage)}"]`))$('#stageSel').insertAdjacentHTML('beforeend',`<option value="${esc(l.stage)}">${esc(l.stage)}</option>`);
+  for(const el of f.elements){if(el.name&&l[el.name]!=null)el.value=el.name==='amount'?won(l.amount):l[el.name]}
+  draftHistory=JSON.parse(JSON.stringify(l.history||[]));renderHistory();
+  $('#hDate').value=today();$('#hResult').value='';
+  $('#mTitle').textContent=id?`${l.org}`:'리드 등록';
+  $('#delBtn').classList.toggle('hidden',!id);
+  $('#leadOv').classList.add('open');
+}
+function nextNo(){return leads.reduce((m,l)=>Math.max(m,+l.no||0),0)+1}
+function renderHistory(){
+  $('#history').innerHTML=draftHistory.map((h,i)=>[h,i]).sort((a,b)=>b[0].date.localeCompare(a[0].date)||b[1]-a[1]).map(x=>x[0]).map(h=>`<div class="h-item"><div class="d">${esc(h.date)} · ${esc(h.method)} <button type="button" class="btn ghost small" style="min-height:20px;padding:0 6px" onclick="delHistory('${h.id}')">삭제</button></div><p>${esc(h.result)}</p></div>`).join('')||'<div style="color:var(--muted);font-size:12px;padding:4px 0">아직 기록된 F/U 이력이 없습니다.</div>';
+}
+function addHistory(){
+  const r=$('#hResult').value.trim(),d=$('#hDate').value||today();if(!r){toast('F/U 내용을 입력하세요');return}
+  draftHistory.push({id:uid(),date:d,method:$('#hMethod').value,result:r});
+  const f=$('#leadForm');
+  if(!f.lastFu.value||d>=f.lastFu.value){f.lastFu.value=d;f.lastResult.value=r}
+  if(f.stage.value==='신규')f.stage.value='연락 완료';
+  $('#hResult').value='';renderHistory();
+}
+function delHistory(id){draftHistory=draftHistory.filter(h=>h.id!==id);renderHistory()}
+$('#leadForm').onsubmit=e=>{
+  e.preventDefault();const f=e.target,o={};
+  for(const el of f.elements)if(el.name)o[el.name]=el.value.trim();
+  o.amount=o.amount.replace(/[^\d]/g,'');o.no=+o.no||nextNo();o.history=draftHistory;o.updated=today();
+  if(o.stage==='수주'&&!o.wonDate)o.wonDate=today();
+  if(editId){Object.assign(leads.find(x=>x.id===editId),o)}else{o.id=uid();leads.push(o)}
+  save();closeOv('leadOv');toast(editId?'수정했습니다':'리드를 등록했습니다');
+};
+function deleteLead(){
+  const l=leads.find(x=>x.id===editId);if(!l)return;
+  $('#cfMsg').textContent=`「${l.org}」 리드와 F/U 이력이 삭제됩니다.`;
+  $('#cfYes').onclick=()=>{leads=leads.filter(x=>x.id!==editId);save();closeOv('cfOv');closeOv('leadOv');toast('삭제했습니다')};
+  $('#cfOv').classList.add('open');
+}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('mousedown',e=>{if(e.target===o)o.classList.remove('open')}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open'))});
+
+/* ---------- Excel import / export (엑셀 「리드 리스트」 양식 그대로) ---------- */
+function cellDate(v){
+  if(v==null||v==='')return '';
+  if(typeof v==='number'){const p=XLSX.SSF.parse_date_code(v);return p?`${p.y}-${pad(p.m)}-${pad(p.d)}`:''}
+  const s=String(v).trim().replace(/[./]/g,'-');const m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);return m?`${m[1]}-${pad(m[2])}-${pad(m[3])}`:'';
+}
+$('#fileIn').onchange=async e=>{
+  const file=e.target.files[0];e.target.value='';if(!file)return;
+  if(typeof XLSX==='undefined'){toast('엑셀 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하세요');return}
+  try{
+    const wb=XLSX.read(await file.arrayBuffer(),{cellDates:false});
+    const ws=wb.Sheets['리드 리스트']||wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
+    const hi=rows.findIndex(r=>r.some(c=>String(c).replace(/\s/g,'')==='병원·기관명'));
+    const out=[];
+    rows.slice(hi>=0?hi+1:2).forEach(r=>{
+      if(!String(r[3]||'').trim())return;
+      const l={id:uid(),history:[]};
+      COLS.forEach((k,i)=>{let v=r[i];
+        if(['date','lastFu','nextFu','wonDate','updated'].includes(k))v=cellDate(v);
+        else if(k==='amount')v=String(v||'').replace(/[^\d]/g,'');
+        else v=String(v??'').trim();
+        l[k]=v});
+      l.stage=normStage(l.stage);l.no=+l.no||'';
+      if(l.lastFu&&l.lastResult)l.history.push({id:uid(),date:l.lastFu,method:'기타',result:l.lastResult});
+      out.push(l);
+    });
+    if(!out.length){toast('불러올 리드가 없습니다 (병원·기관명이 입력된 행 기준)');return}
+    pendingImport=out;
+    $('#impMsg').innerHTML=`<b>${esc(file.name)}</b>에서 리드 <b>${out.length}건</b>을 찾았습니다.<br>현재 저장된 리드는 ${leads.length}건입니다.<br><br>· 합치기: 같은 전시회+기관+고객명은 엑셀 내용으로 갱신, 나머지는 추가<br>· 전체 교체: 현재 데이터를 지우고 엑셀로 대체`;
+    $('#impOv').classList.add('open');
+  }catch(err){console.error(err);toast('엑셀을 읽지 못했습니다')}
+};
+function applyImport(mode){
+  if(!pendingImport)return;
+  if(mode==='replace'||!leads.length){leads=pendingImport}
+  else{
+    const key=l=>[l.expo,l.org,l.name].join('|');
+    pendingImport.forEach(n=>{const ex=leads.find(l=>key(l)===key(n));
+      if(ex){const h=ex.history||[];Object.assign(ex,n,{id:ex.id,history:h});}else{n.no=nextNo();leads.push(n)}});
+  }
+  leads.forEach((l,i)=>{if(!l.no)l.no=i+1});
+  pendingImport=null;save();closeOv('impOv');toast('엑셀을 불러왔습니다');
+}
+function exportXlsx(){
+  if(typeof XLSX==='undefined'){toast('엑셀 라이브러리를 불러오지 못했습니다');return}
+  render();
+  const head1=['전시회 접수','','','고객 정보','','','','','','','관심 내용','','','Follow-up 현황','','','','','','','결과','','','관리'];
+  const data=leads.slice().sort((a,b)=>(+a.no||0)-(+b.no||0)).map(l=>COLS.map(k=>k==='amount'?(l.amount?+l.amount:''):(l[k]??'')));
+  const ws=XLSX.utils.aoa_to_sheet([head1,HEAD2,...data]);
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:2}},{s:{r:0,c:3},e:{r:0,c:9}},{s:{r:0,c:10},e:{r:0,c:12}},{s:{r:0,c:13},e:{r:0,c:19}},{s:{r:0,c:20},e:{r:0,c:22}}];
+  ws['!cols']=[5,22,11,22,7,13,9,8,14,22,13,7,28,9,11,11,26,20,13,9,14,11,18,12].map(w=>({wch:w}));
+  const hist=[['No','병원·기관명','고객명','F/U일','방법','내용·결과']];
+  leads.forEach(l=>(l.history||[]).forEach(h=>hist.push([l.no,l.org,l.name,h.date,h.method,h.result])));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'리드 리스트');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(hist),'F/U 이력');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['진행 단계','관심도','F/U 방법','관심 제품'],...Array.from({length:Math.max(STAGES.length,PRODUCTS.length)},(_,i)=>[STAGES[i]||'',['상','중','하'][i]||'',METHODS[i]||'',PRODUCTS[i]||''])]),'목록값');
+  XLSX.writeFile(wb,`전시회_FU_관리_${today()}.xlsx`);
+}
+
+render();
+</script>
+</body>
+</html>
